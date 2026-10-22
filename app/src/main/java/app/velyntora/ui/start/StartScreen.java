@@ -9,7 +9,7 @@ public final class StartScreen {
     public StartScreen(Context context,StartActions actions){this.context=context;this.actions=actions;}
     public View create(){
         Context c=context;boolean wide=c.getResources().getConfiguration().screenWidthDp>=700;
-        LinearLayout root=new LinearLayout(c);root.setOrientation(wide?0:1);root.setBackgroundColor(BG);
+        LinearLayout root=new LinearLayout(c);root.setOrientation(wide?LinearLayout.HORIZONTAL:LinearLayout.VERTICAL);root.setBackgroundColor(BG);
         View hero=DrawingHero.create(c,actions);
         root.addView(hero,wide?new LinearLayout.LayoutParams(0,-1,0.36f):new LinearLayout.LayoutParams(-1,dp(c,460)));
         ScrollView scroll=new ScrollView(c);scroll.setFillViewport(true);
