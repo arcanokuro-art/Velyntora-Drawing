@@ -15,7 +15,7 @@ for preset in catalog:
  folder=brushroot/preset['folder'];data=folder/'preset.json'
  if not data.exists():continue
  props=json.loads(data.read_text());dest=resources/'brushes'/str(preset['id']);dest.mkdir(parents=True,exist_ok=True)
- for name in ['tip.bin','texture.bin']:shutil.copyfile(folder/name,dest/name)
+ for name in ['tip.bin','texture.bin','preview.png']:shutil.copyfile(folder/name,dest/name)
  def arr(xs):return 'new float[]{'+','.join(str(float(x))+'f' for x in xs)+'}'
  curves=[arr([v for pair in points for v in pair]) for points in props['curves']]
  rows.append('new Preset('+str(preset['id'])+','+json.dumps(preset['category']+' · '+preset['name'],ensure_ascii=False)+','+arr(props['params'])+','+','.join(curves)+')')
@@ -42,3 +42,6 @@ backend=backend.replace('load(Context context)','load()').replace('synchronized 
 (generated/'OfflineRemove.java').write_text(backend)
 p=generated/'DrawingView.java';text=p.read_text().replace('\n}', '\n public static native boolean nativeStageObject(byte[] encoded,float[] transform,byte[] text,int[] style);\n public static native byte[] nativeObjectSource(int index);\n public static native void nativeAttachPointer(long hwnd);\n public static native float nativePointerPressure();\n}');p.write_text(text)
 shutil.copyfile(root/'engine/tools/line_curve/CurveDraft.java',generated/'CurveDraft.java')
+p=generated/'DrawingView.java';p.write_text(p.read_text().replace('\n}', '\n public static native boolean nativeRecoveryPath(String path,long revision);\n}'))
+shutil.copyfile(root/'engine/tools/gradient/GradientRaster.java',generated/'GradientRaster.java')
+shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/formats/metadata/ExifOrientation.java',generated/'ExifOrientation.java')

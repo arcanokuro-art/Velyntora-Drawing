@@ -14,7 +14,7 @@ public final class DocumentIO {
   if(path.toString().toLowerCase().endsWith(".vlycore")){if(!DrawingView.nativeProjectPath(path.toAbsolutePath().toString(),false))throw new java.io.IOException("Proyecto no compatible o dañado");}
   else if(art.velyntora.core.DesktopFormats.extension(path).equals("ora")){art.velyntora.core.DesktopFormats.openOra(path);}
   else{BufferedImage image=art.velyntora.core.DesktopFormats.read(path);if(image==null)throw new java.io.IOException("Formato de imagen no compatible en este piloto");if(image.getWidth()>6000||image.getHeight()>6000)throw new java.io.IOException("Máximo: 6000 × 6000 px");int w=image.getWidth(),h=image.getHeight();if(!DrawingView.nativeLoadBitmap(w,h,image.getRGB(0,0,w,h,null,0,w)))throw new java.io.IOException("No se pudo importar la imagen");}
-  remember(path);
+  if(!path.toAbsolutePath().equals(DocumentRecovery.file().toAbsolutePath()))remember(path);
  }
  public static void saveProject(Path path)throws Exception{
   Path target=path.toAbsolutePath(),temp=Files.createTempFile(target.getParent(),"velyntora-",".tmp");try{if(!DrawingView.nativeProjectPath(temp.toString(),true))throw new java.io.IOException("No se pudo guardar el proyecto");try{Files.move(temp,target,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);}catch(AtomicMoveNotSupportedException e){Files.move(temp,target,StandardCopyOption.REPLACE_EXISTING);}remember(target);}finally{Files.deleteIfExists(temp);}

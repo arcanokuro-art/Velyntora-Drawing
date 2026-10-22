@@ -1,13 +1,7 @@
 $ErrorActionPreference = 'Stop'
 python -m pip install Pillow==12.0.0
 if ($LASTEXITCODE -ne 0) { throw 'Pillow install failed' }
-New-Item -ItemType Directory -Force windows/build/input | Out-Null
-mvn -B -f windows/pom.xml dependency:copy-dependencies "-DoutputDirectory=$((Resolve-Path windows/build/input).Path)"
-if ($LASTEXITCODE -ne 0) { throw 'Desktop dependencies failed' }
 $env:VELYNTORA_BUILD_INPUT = (Resolve-Path windows/build/input).Path
-$model = Join-Path $env:VELYNTORA_BUILD_INPUT 'migan_pipeline_v2.onnx'
-Invoke-WebRequest 'https://huggingface.co/andraniksargsyan/migan/resolve/1538c135034b8cfe7a8472f34d09c8a5a45b17a7/migan_pipeline_v2.onnx' -OutFile $model
-if ((Get-FileHash $model -Algorithm SHA256).Hash.ToLower() -ne '6f1f3530a1a2324b19752018ce756088b07973cda8d7d890034ace5c8a48c40b') { throw 'MI-GAN SHA256 mismatch' }
 python windows/scripts/prepare.py
 if ($LASTEXITCODE -ne 0) { throw 'Resource generation failed' }
 cmake -S windows -B windows/build/native -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++

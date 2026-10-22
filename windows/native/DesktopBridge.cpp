@@ -32,3 +32,6 @@ LRESULT CALLBACK penProcedure(HWND hwnd,UINT message,WPARAM wp,LPARAM lp){WNDPRO
 }}
 extern "C" JNIEXPORT void JNICALL Java_art_velyntora_core_DrawingView_nativeAttachPointer(JNIEnv*,jclass,jlong value){HWND hwnd=reinterpret_cast<HWND>(static_cast<std::intptr_t>(value));if(!IsWindow(hwnd))return;std::lock_guard<std::mutex> lock(penGuard);if(penWindows.count(hwnd))return;auto original=reinterpret_cast<WNDPROC>(SetWindowLongPtr(hwnd,GWLP_WNDPROC,reinterpret_cast<LONG_PTR>(penProcedure)));if(original){penWindows[hwnd]=original;RegisterPointerInputTarget(hwnd,PT_PEN);}}
 extern "C" JNIEXPORT jfloat JNICALL Java_art_velyntora_core_DrawingView_nativePointerPressure(JNIEnv*,jclass){return GetTickCount64()-penTime.load()<500?penPressure.load():1.f;}
+extern "C" JNIEXPORT jboolean JNICALL Java_art_velyntora_core_DrawingView_nativeRecoveryPath(JNIEnv* env,jclass cls,jstring path,jlong expected){
+ const jchar* chars=env->GetStringChars(path,nullptr);if(!chars)return JNI_FALSE;std::wstring file(reinterpret_cast<const wchar_t*>(chars),env->GetStringLength(path));env->ReleaseStringChars(path,chars);int fd=_wopen(file.c_str(),_O_CREAT|_O_TRUNC|_O_WRONLY|_O_BINARY,_S_IREAD|_S_IWRITE);if(fd<0)return JNI_FALSE;auto result=Java_art_velyntora_core_DrawingView_nativeSaveRecovery(env,cls,fd,expected);_close(fd);return result;
+}
