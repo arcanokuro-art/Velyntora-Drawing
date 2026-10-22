@@ -19,8 +19,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows smoke tests failed' }
 jpackage --type app-image --dest windows/build/distribution --input windows/build/input --name V-Drawing --main-jar Velyntora-Drawing.jar --app-version 0.2.0 --vendor 'Zaskar Startup' --description 'Velyntora Drawing - Piloto Windows' --java-options '-Xmx2g' --java-options '-Djava.library.path=$APPDIR'
 if ($LASTEXITCODE -ne 0) { throw 'Packaging failed' }
 # Launch the packaged executable, including its bundled runtime and DLL, before delivery.
-$process = Start-Process windows/build/distribution/V-Drawing/V-Drawing.exe -PassThru
-Start-Sleep -Seconds 8
-if ($process.HasExited) { throw 'Packaged executable closed during startup' }
-Stop-Process -Id $process.Id
+$marker = Join-Path $env:RUNNER_TEMP 'velyntora-packaged-test.txt'
+$process = Start-Process windows/build/distribution/V-Drawing/V-Drawing.exe -ArgumentList @('--self-test', $marker) -PassThru -Wait
+if ($process.ExitCode -ne 0 -or !(Test-Path $marker) -or (Get-Content $marker) -ne 'ok') { throw 'Packaged executable self-test failed' }
 Compress-Archive -Path windows/build/distribution/V-Drawing -DestinationPath windows/build/Velyntora-Drawing-Windows-x64.zip

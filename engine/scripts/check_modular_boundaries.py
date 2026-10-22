@@ -5,7 +5,7 @@ import hashlib,json,re,sys
 root=Path(__file__).resolve().parents[1]
 manifest=json.loads((root/'docs/modules/protected-code.json').read_text())
 errors=[]
-actual={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (root/'tools').rglob('*') if p.is_file()}
+actual={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in (root/'tools').rglob('*') if p.is_file()}
 if actual!=manifest['tools']:errors.append('Protected tools changed: '+', '.join(sorted(set(actual)^set(manifest['tools'])|{p for p in set(actual)&set(manifest['tools']) if actual[p]!=manifest['tools'][p]})))
 if hashlib.sha256((root/"app/src/main/cpp/session/EngineSession.inc").read_bytes()).hexdigest()!=manifest["session"]:errors.append("Native session implementation changed")
 exports={}
