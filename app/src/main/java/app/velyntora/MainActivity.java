@@ -15,5 +15,5 @@ public final class MainActivity extends Activity implements StartActions {
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==2001&&result==RESULT_OK&&data!=null&&data.getData()!=null)info("Imagen seleccionada","La imagen se ha seleccionado. Su edición estará disponible cuando se integre el motor de dibujo.");}
     public void showRecentProjects(){info("Proyectos recientes","Todavía no hay proyectos guardados en esta versión piloto.");}
     public void showPreferences(){info("Preferencias","Las preferencias estarán disponibles en una próxima etapa del prototipo.");}
-    public void showHelp(){info("Velyntora Drawing · Versión piloto","Prototipo de la pantalla de inicio. Crea ilustraciones y edita imágenes.\n\nPowered By Zakar Startup");}
+    public void showHelp(){info("Velyntora Drawing · Versión piloto","Prototipo de la pantalla de inicio. Crea ilustraciones y edita imágenes.\n\nPowered By Zaskar Startup");}
 }
