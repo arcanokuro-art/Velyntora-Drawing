@@ -13,7 +13,8 @@ public final class DesktopSmoke {
   Path png=folder.resolve("drawing.png");DocumentIO.export(png);check(javax.imageio.ImageIO.read(png.toFile()).getWidth()==128,"PNG export");
   for(var preset:BrushPresets.ALL){check(BrushPresets.begin(preset),"brush "+preset.label());DrawingView.nativeBeginEdit();DrawingView.nativeTipBrushStroke(10,20,60,20,5,0xff204080,.8f,1);}
   check(BrushPresets.ALL.length>=30,"bundled catalog");
-  SwingUtilities.invokeAndWait(()->{try{var home=new app.velyntora.windows.app.HomeWindow();home.setVisible(true);check(home.isShowing(),"Windows home");var editor=new app.velyntora.windows.app.EditorWindow(home);editor.setVisible(true);editor.refresh();editor.canvas.setSize(800,600);BufferedImage screenshot=new BufferedImage(800,600,BufferedImage.TYPE_INT_ARGB);editor.canvas.paint(screenshot.getGraphics());javax.imageio.ImageIO.write(screenshot,"png",folder.resolve("canvas.png").toFile());editor.dispose();home.dispose();}catch(Exception error){throw new RuntimeException(error);}});
+  ExtendedSmoke.run(folder);
+  SwingUtilities.invokeAndWait(()->{try{var home=new app.velyntora.windows.app.HomeWindow();home.setVisible(true);check(home.isShowing(),"Windows home");var editor=new app.velyntora.windows.app.EditorWindow(home);editor.setVisible(true);app.velyntora.windows.input.PointerInput.attach(editor);editor.refresh();editor.canvas.setSize(800,600);BufferedImage screenshot=new BufferedImage(800,600,BufferedImage.TYPE_INT_ARGB);editor.canvas.paint(screenshot.getGraphics());javax.imageio.ImageIO.write(screenshot,"png",folder.resolve("canvas.png").toFile());editor.dispose();home.dispose();}catch(Exception error){throw new RuntimeException(error);}});
   System.out.println("Windows smoke passed: JNI, stroke, undo/redo, layers, Unicode paths, VLYCORE, PNG, "+BrushPresets.ALL.length+" brushes, home/editor render.");
  }
 }
