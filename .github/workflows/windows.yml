@@ -1,0 +1,49 @@
+name: Windows x64
+on:
+  push:
+    branches: [windows]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: windows-pilot
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+      - shell: pwsh
+        run: Add-Content $env:GITHUB_PATH 'C:\msys64\mingw64\bin'
+      - name: Verificar motor y separación modular
+        run: python engine/scripts/check_modular_boundaries.py
+      - name: Compilar, probar y empaquetar Windows
+        shell: pwsh
+        run: windows/scripts/build.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Velyntora-Drawing-Windows-x64
+          path: windows/build/Velyntora-Drawing-Windows-x64.zip
+          if-no-files-found: error
+      - name: Publicar piloto Windows
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view windows-pilot *> $null
+          if ($LASTEXITCODE -ne 0) { gh release create windows-pilot --target windows --title 'Velyntora Drawing · Piloto Windows x64' --notes 'Extrae todo el ZIP y ejecuta V-Drawing.exe. Incluye su entorno Java y el motor C++ original. Piloto de escritorio; consulta windows/README.md para el alcance.' --prerelease }
+          gh release upload windows-pilot windows/build/Velyntora-Drawing-Windows-x64.zip --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Windows publication failed' }
