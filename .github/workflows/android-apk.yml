@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -24,3 +24,9 @@ jobs:
           name: Velyntora-Drawing-pilot
           path: Velyntora-Drawing-pilot.apk
           if-no-files-found: error
+      - name: Publicar APK piloto
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view pilot-latest >/dev/null 2>&1 || gh release create pilot-latest --title "Velyntora Drawing · Piloto" --notes "Prototipo de la pantalla de inicio para pruebas en Android. Nombre bajo el icono: V-Drawing." --prerelease
+          gh release upload pilot-latest Velyntora-Drawing-pilot.apk --clobber
