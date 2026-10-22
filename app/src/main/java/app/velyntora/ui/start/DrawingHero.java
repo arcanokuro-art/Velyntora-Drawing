@@ -15,6 +15,6 @@ public final class DrawingHero {
         LinearLayout.LayoutParams button=new LinearLayout.LayoutParams(-1,dp(c,52));button.topMargin=dp(c,18);controls.addView(button(c,"Crear ilustración",true,actions::createIllustration),button);
         LinearLayout.LayoutParams open=new LinearLayout.LayoutParams(-1,dp(c,52));open.topMargin=dp(c,12);controls.addView(button(c,"Abrir imagen",false,actions::openImage),open);
         FrameLayout.LayoutParams center=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);hero.addView(controls,center);
-        TextView credit=text(c,"Powered By Zakar Startup",15,true);credit.setGravity(Gravity.CENTER);FrameLayout.LayoutParams footer=new FrameLayout.LayoutParams(-1,dp(c,52),Gravity.BOTTOM);hero.addView(credit,footer);return hero;
+        TextView credit=text(c,"Powered By Zaskar Startup",15,true);credit.setGravity(Gravity.CENTER);FrameLayout.LayoutParams footer=new FrameLayout.LayoutParams(-1,dp(c,52),Gravity.BOTTOM);hero.addView(credit,footer);return hero;
     }
 }
