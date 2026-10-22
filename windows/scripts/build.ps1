@@ -3,7 +3,7 @@ python -m pip install Pillow==12.0.0
 if ($LASTEXITCODE -ne 0) { throw 'Pillow install failed' }
 python windows/scripts/prepare.py
 if ($LASTEXITCODE -ne 0) { throw 'Resource generation failed' }
-cmake -S windows -B windows/build/native -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S windows -B windows/build/native -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++
 if ($LASTEXITCODE -ne 0) { throw 'CMake failed' }
 cmake --build windows/build/native --parallel 2
 if ($LASTEXITCODE -ne 0) { throw 'Native build failed' }

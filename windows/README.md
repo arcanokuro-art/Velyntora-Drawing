@@ -25,7 +25,7 @@ Rueda: zoom. Alt+rueda: rotar. Botón central: desplazar. Ctrl+S/O/N/Z/Y/C/V. Al
 
 ## Diferencias pendientes respecto a Android
 
-Este piloto todavía no tiene paridad completa. Remove AI, importación de formatos especiales como ORA/SVG/WebP, edición no destructiva de texto/imágenes y presión de tableta no están expuestos en la interfaz Windows. La curva de tres puntos es cuadrática; más puntos se unen por segmentos. La selección copiada usa el lienzo completo. Las exportaciones fuera de VLYCORE aplanan las capas.
+Este piloto todavía no tiene paridad completa. Remove AI, importación de formatos especiales como ORA/SVG/WebP, edición no destructiva de texto/imágenes y presión de tableta no están expuestos en la interfaz Windows. La curva de tres puntos es cuadrática; más puntos se unen por segmentos. Las exportaciones fuera de VLYCORE aplanan las capas.
 
 La versión no está firmada con un certificado comercial.
 
