@@ -12,6 +12,5 @@
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
         <!-- Igual que Krita: dejar a Android/ventana gestionar el área útil. -->
-        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 </resources>
