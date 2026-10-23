@@ -14,6 +14,8 @@ public final class DesktopSmoke {
   for(var preset:BrushPresets.ALL){check(BrushPresets.begin(preset),"brush "+preset.label());DrawingView.nativeBeginEdit();DrawingView.nativeTipBrushStroke(10,20,60,20,5,0xff204080,.8f,1);}
   check(BrushPresets.ALL.length>=30,"bundled catalog");
   ExtendedSmoke.run(folder);
+  ParitySmoke.run();
+  DrawingView.nativeCreate(32,24);
   SwingUtilities.invokeAndWait(()->{try{var home=new app.velyntora.windows.app.HomeWindow();home.setVisible(true);check(home.isShowing(),"Windows home");var editor=new app.velyntora.windows.app.EditorWindow(home);editor.setVisible(true);app.velyntora.windows.input.PointerInput.attach(editor);editor.refresh();editor.canvas.setSize(800,600);editor.canvas.zoom=1;editor.canvas.rotation=0;editor.canvas.offsetX=editor.canvas.offsetY=0;
     var canvas=editor.canvas;long before=DrawingView.nativeRevision();canvas.tool=app.velyntora.windows.tools.Tool.BRUSH;
     canvas.dispatchEvent(new java.awt.event.MouseEvent(canvas,java.awt.event.MouseEvent.MOUSE_PRESSED,System.currentTimeMillis(),java.awt.event.InputEvent.BUTTON1_DOWN_MASK,5,5,1,false,java.awt.event.MouseEvent.BUTTON1));

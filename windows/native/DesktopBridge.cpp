@@ -39,3 +39,7 @@ extern "C" JNIEXPORT jfloat JNICALL Java_art_velyntora_core_DrawingView_nativePo
 extern "C" JNIEXPORT jboolean JNICALL Java_art_velyntora_core_DrawingView_nativeRecoveryPath(JNIEnv* env,jclass cls,jstring path,jlong expected){
  const jchar* chars=env->GetStringChars(path,nullptr);if(!chars)return JNI_FALSE;std::wstring file(reinterpret_cast<const wchar_t*>(chars),env->GetStringLength(path));env->ReleaseStringChars(path,chars);int fd=_wopen(file.c_str(),_O_CREAT|_O_TRUNC|_O_WRONLY|_O_BINARY,_S_IREAD|_S_IWRITE);if(fd<0)return JNI_FALSE;auto result=Java_art_velyntora_core_DrawingView_nativeSaveRecovery(env,cls,fd,expected);_close(fd);return result;
 }
+// Actual allocated pixel payload in the current layer set (not a dense canvas estimate).
+extern "C" JNIEXPORT jlong JNICALL Java_art_velyntora_core_DrawingView_nativeDocumentBytes(JNIEnv*,jclass){
+ std::lock_guard<std::mutex> lock(guard);if(!layers)return 0;std::uint64_t bytes=0;for(std::size_t i=0;i<layers->layerCount();++i)bytes+=layers->layer(i).pixels.allocatedPixels()*sizeof(std::uint32_t);return static_cast<jlong>(bytes);
+}

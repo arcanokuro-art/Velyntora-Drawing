@@ -65,3 +65,13 @@ shutil.copyfile(root/'windows/README.md',input_dir/'LEEME.md')
 shutil.copytree(licenses,input_dir/'licenses',dirs_exist_ok=True)
 shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/document/importing/ImageImportSize.java',generated/'ImageImportSize.java')
 shutil.copyfile(root/'engine/tests/ImageImportSizeTests.java',generated/'ImageImportSizeTests.java')
+# Reuse each original tool icon's geometry through the Java2D desktop adapter.
+icon_map={'REMOVE_AI':None,'CIRCLE':'CircleIcon','FREEFORM':'FreeformIcon','MOVE_PIXELS':'MovePixelsIcon','BRUSH':'BrushIcon','PENCIL':'PencilIcon','ERASER':'EraserIcon','FILL':'BucketIcon','PICKER':'PickerIcon','PAN':'PanIcon','ZOOM':'ZoomIcon','LINE':'LineCurveIcon','RECT':'RectangleIcon','ELLIPSE':'EllipseIcon','TRIANGLE':'TriangleIcon','ROUNDRECT':'RoundedRectangleIcon','SELECT':'RectangleSelectionIcon','ELLIPSE_SELECT':'EllipseSelectionIcon','LASSO':'LassoSelectionIcon','WAND':'MagicWandIcon','GRADIENT':'GradientIcon','TEXT':'TextIcon','CLONE':'CloneIcon','RECOLOR':'RecolorIcon','MOVE':'MoveSelectionIcon'}
+icon_dir=build/'generated/app/velyntora/windows/tools';icon_dir.mkdir(parents=True,exist_ok=True)
+for name in set(icon_map.values())- {None}:
+ source=next((root/'engine/tools').rglob(name+'.java')).read_text()
+ source=source.replace('package art.velyntora.core;','package app.velyntora.windows.tools;').replace('import android.graphics.*;','').replace('extends ToolIcon','extends DesktopToolIcon')
+ (icon_dir/(name+'.java')).write_text(source)
+cases=''.join('case '+tool+' -> new '+name+'();' for tool,name in icon_map.items() if name)
+(icon_dir/'ToolIcons.java').write_text('package app.velyntora.windows.tools; public final class ToolIcons {public static javax.swing.Icon of(Tool tool){return switch(tool){'+cases+'case REMOVE_AI -> new javax.swing.ImageIcon(new javax.swing.ImageIcon(ToolIcons.class.getResource("/remove_ai.png")).getImage().getScaledInstance(28,28,java.awt.Image.SCALE_SMOOTH));};}}')
+p=generated/'DrawingView.java';p.write_text(p.read_text().replace('\n}', '\n public static native long nativeDocumentBytes();\n}'))
