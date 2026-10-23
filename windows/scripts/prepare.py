@@ -63,3 +63,5 @@ provenance={'application':'Velyntora Drawing','version':'0.3.0','branch':'window
 (input_dir/'BUILD-INFO.json').write_text(json.dumps(provenance,indent=2)+'\n')
 shutil.copyfile(root/'windows/README.md',input_dir/'LEEME.md')
 shutil.copytree(licenses,input_dir/'licenses',dirs_exist_ok=True)
+shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/document/importing/ImageImportSize.java',generated/'ImageImportSize.java')
+shutil.copyfile(root/'engine/tests/ImageImportSizeTests.java',generated/'ImageImportSizeTests.java')
