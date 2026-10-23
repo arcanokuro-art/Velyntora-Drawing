@@ -48,3 +48,5 @@ shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/formats/metada
 shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/components/effects/adjustments/ToneCurve.java',generated/'ToneCurve.java')
 for name in ['BmpReaderTests','CurveDraftTests','ExifOrientationTests','GradientRasterTests','GifWriterTests','IcoCodecTests','IconContainersTests','OpenRasterTests','PcxReaderTests','PpmCodecTests','RasterFileWriterTests','TgaReaderTests','TiffReaderTests','TiffWriterTests','VlyImageElementStreamTests','VlyTextElementStreamTests','XRasterReaderTests','ToneCurveTests']:
  shutil.copyfile(root/'engine/tests'/f'{name}.java',generated/f'{name}.java')
+# Keep the original assertions; replace the single Linux-only fixture path for Windows.
+p=generated/'BmpReaderTests.java';p.write_text(p.read_text().replace('"/tmp/velyntora-bmp-independent.bmp"','java.nio.file.Path.of(System.getProperty("java.io.tmpdir"),"velyntora-bmp-independent.bmp").toString()'))
