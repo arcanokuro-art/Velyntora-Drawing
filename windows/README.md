@@ -21,7 +21,7 @@ El motor se compila directamente desde `engine/`: no se reemplazan los algoritmo
 
 Inicio con imagen, logo transparente, aviso piloto y Powered By Zaskar Startup; nuevo lienzo hasta 6000 × 6000; PNG/JPEG/BMP/GIF/TIFF según los códecs de ImageIO; guardado/reapertura VLYCORE con capas; pinceles, lápiz, goma, cubo, selector, clonar, recoloración, figuras, texto editable, selecciones, varita, degradado, capas y mezclas; ajustes de color; deshacer/rehacer; zoom hasta 7000% con píxeles definidos; rotación y desplazamiento.
 
-Rueda: zoom. Alt+rueda: rotar. Botón central: desplazar. Ctrl+S/O/N/Z/Y/C/V. Alt+clic: origen de clonado. Línea/Curva permite añadir y arrastrar puntos, Enter confirma y Ctrl+Z recupera el borrador tras confirmar.
+Rueda: zoom. Alt+rueda: rotar. Botón central: desplazar. Ctrl+S/O/N/Z/Y/C/V. Primer clic en Clonar: origen; Alt+clic: cambiar origen. Línea/Curva permite añadir y arrastrar puntos, Enter confirma y Ctrl+Z recupera el borrador tras confirmar.
 
 ## Módulos completos de escritorio
 
