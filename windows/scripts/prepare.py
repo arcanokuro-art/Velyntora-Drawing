@@ -45,3 +45,6 @@ shutil.copyfile(root/'engine/tools/line_curve/CurveDraft.java',generated/'CurveD
 p=generated/'DrawingView.java';p.write_text(p.read_text().replace('\n}', '\n public static native boolean nativeRecoveryPath(String path,long revision);\n}'))
 shutil.copyfile(root/'engine/tools/gradient/GradientRaster.java',generated/'GradientRaster.java')
 shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/formats/metadata/ExifOrientation.java',generated/'ExifOrientation.java')
+shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/components/effects/adjustments/ToneCurve.java',generated/'ToneCurve.java')
+for name in ['BmpReaderTests','CurveDraftTests','ExifOrientationTests','GradientRasterTests','GifWriterTests','IcoCodecTests','IconContainersTests','OpenRasterTests','PcxReaderTests','PpmCodecTests','RasterFileWriterTests','TgaReaderTests','TiffReaderTests','TiffWriterTests','VlyImageElementStreamTests','VlyTextElementStreamTests','XRasterReaderTests','ToneCurveTests']:
+ shutil.copyfile(root/'engine/tests'/f'{name}.java',generated/f'{name}.java')

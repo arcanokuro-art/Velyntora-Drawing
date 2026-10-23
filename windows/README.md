@@ -31,6 +31,10 @@ Rueda: zoom. Alt+rueda: rotar. Botón central: desplazar. Ctrl+S/O/N/Z/Y/C/V. Al
 - Texto editable: contenido UTF-8, fuente, tamaño, color, estilo, ajuste de línea y transformación; editable tras reabrir el proyecto.
 - Todas las familias de efectos de Core y ajustes RGB, niveles y curvas; selección aplicada antes de la operación.
 - Windows Ink: captura nativa de presión y promoción a eventos de ratón AWT. La respuesta de cada tableta y controlador requiere prueba física; sin muestras de lápiz se conserva la presión normal del ratón.
+- Recuperación: copia revisionada del documento tras tres segundos de inactividad, recuperación desde el inicio y descarte coordinado con escrituras en curso.
+- Selecciones y capas: copiar/cortar/duplicar, invertir, expandir, contraer, mover, transformar, recortar, combinar y propiedades.
+- Pinceles: clásico y bordes suavizados, 34 presets con vista previa, aerógrafo sostenido y parámetros independientes por herramienta; paleta guardada.
+- Degradados: cinco modos y color primario/secundario o transparencia.
 - Línea/Curva: reutiliza CurveDraft original, puntos sobre la curva, tensión editable, múltiples líneas antes de Enter y recuperación del borrador con Deshacer.
 
 La versión es piloto y no tiene firma comercial. Las pruebas automáticas comprueban el motor y el paquete en Windows; no sustituyen la prueba física de una tableta ni garantizan rendimiento en todo equipo.
