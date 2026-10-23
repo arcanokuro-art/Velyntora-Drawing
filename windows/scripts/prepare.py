@@ -50,3 +50,16 @@ for name in ['BmpReaderTests','CurveDraftTests','ExifOrientationTests','Gradient
  shutil.copyfile(root/'engine/tests'/f'{name}.java',generated/f'{name}.java')
 # Keep the original assertions; replace the single Linux-only fixture path for Windows.
 p=generated/'BmpReaderTests.java';p.write_text(p.read_text().replace('"/tmp/velyntora-bmp-independent.bmp"','java.nio.file.Path.of(System.getProperty("java.io.tmpdir"),"velyntora-bmp-independent.bmp").toString()'))
+# Keep named X11 colors and third-party attribution in the distributed application.
+shutil.copytree(root/'engine/app/src/main/resources',resources,dirs_exist_ok=True)
+licenses=resources/'licenses';licenses.mkdir(exist_ok=True)
+shutil.copyfile(root/'engine/tools/remove_ai/assets/remove_ai/MI-GAN-LICENSE.txt',licenses/'MI-GAN-LICENSE.txt')
+for p in (root/'engine/app/src/main/assets/licenses').glob('*'):shutil.copyfile(p,licenses/p.name)
+shutil.copyfile(brushroot/'provenance.json',licenses/'brush-provenance.json')
+Image.open(root/'engine/tools/remove_ai/assets/remove_ai/remove_ai.webp').save(resources/'remove_ai.png')
+import subprocess
+input_dir=build/'input';input_dir.mkdir(exist_ok=True)
+provenance={'application':'Velyntora Drawing','version':'0.3.0','branch':'windows','commit':subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip(),'core_commit':json.loads((root/'docs/core-source.json').read_text())['commit'],'migan_sha256':'6f1f3530a1a2324b19752018ce756088b07973cda8d7d890034ace5c8a48c40b'}
+(input_dir/'BUILD-INFO.json').write_text(json.dumps(provenance,indent=2)+'\n')
+shutil.copyfile(root/'windows/README.md',input_dir/'LEEME.md')
+shutil.copytree(licenses,input_dir/'licenses',dirs_exist_ok=True)
