@@ -18,7 +18,7 @@ jar --create --file windows/build/input/Velyntora-Drawing.jar --manifest windows
 if ($LASTEXITCODE -ne 0) { throw 'JAR failed' }
 java '-Djava.library.path=windows/build/input' "-Dvelyntora.assets=$env:VELYNTORA_BUILD_INPUT" -cp 'windows/build/classes;windows/build/resources;windows/build/input/*' DesktopSmoke
 if ($LASTEXITCODE -ne 0) { throw 'Windows smoke tests failed' }
-jpackage --type app-image --dest windows/build/distribution --input windows/build/input --name V-Drawing --main-jar Velyntora-Drawing.jar --app-version 0.3.0 --vendor 'Zaskar Startup' --description 'Velyntora Drawing - Piloto Windows' --java-options '-Xmx2g' --java-options '-Djava.library.path=$APPDIR' --java-options '-Dvelyntora.assets=$APPDIR'
+jpackage --type app-image --dest windows/build/distribution --input windows/build/input --name V-Drawing --main-jar Velyntora-Drawing.jar --app-version 0.4.0 --vendor 'Zaskar Startup' --description 'Velyntora Drawing - Piloto Windows' --java-options '-Xmx2g' --java-options '-Djava.library.path=$APPDIR' --java-options '-Dvelyntora.assets=$APPDIR'
 if ($LASTEXITCODE -ne 0) { throw 'Packaging failed' }
 # Launch the packaged executable, including its bundled runtime and DLL, before delivery.
 $marker = Join-Path $env:RUNNER_TEMP 'velyntora-packaged-test.txt'

@@ -59,7 +59,7 @@ shutil.copyfile(brushroot/'provenance.json',licenses/'brush-provenance.json')
 Image.open(root/'engine/tools/remove_ai/assets/remove_ai/remove_ai.webp').save(resources/'remove_ai.png')
 import subprocess
 input_dir=build/'input';input_dir.mkdir(exist_ok=True)
-provenance={'application':'Velyntora Drawing','version':'0.3.0','branch':'windows','commit':subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip(),'core_commit':json.loads((root/'docs/core-source.json').read_text())['commit'],'migan_sha256':'6f1f3530a1a2324b19752018ce756088b07973cda8d7d890034ace5c8a48c40b'}
+provenance={'application':'Velyntora Drawing','version':'0.4.0','branch':'windows','commit':subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip(),'core_commit':json.loads((root/'docs/core-source.json').read_text())['commit'],'migan_sha256':'6f1f3530a1a2324b19752018ce756088b07973cda8d7d890034ace5c8a48c40b'}
 (input_dir/'BUILD-INFO.json').write_text(json.dumps(provenance,indent=2)+'\n')
 shutil.copyfile(root/'windows/README.md',input_dir/'LEEME.md')
 shutil.copytree(licenses,input_dir/'licenses',dirs_exist_ok=True)
@@ -75,3 +75,24 @@ for name in set(icon_map.values())- {None}:
 cases=''.join('case '+tool+' -> new '+name+'();' for tool,name in icon_map.items() if name)
 (icon_dir/'ToolIcons.java').write_text('package app.velyntora.windows.tools; public final class ToolIcons {public static javax.swing.Icon of(Tool tool){return switch(tool){'+cases+'case REMOVE_AI -> new javax.swing.ImageIcon(new javax.swing.ImageIcon(ToolIcons.class.getResource("/remove_ai.png")).getImage().getScaledInstance(28,28,java.awt.Image.SCALE_SMOOTH));};}}')
 p=generated/'DrawingView.java';p.write_text(p.read_text().replace('\n}', '\n public static native long nativeDocumentBytes();\n}'))
+# Keep Android's one-click color presets and numeric arguments, not just their algorithms.
+source=(root/'engine/app/src/main/java/art/velyntora/core/components/menus/coloradjustments/ColorAdjustmentsMenu.java').read_text()
+labels=re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"',source.split('new String[] {',1)[1].split('},',1)[0])
+actions=source.split('new Runnable[] {',1)[1].rsplit('});',1)[0]
+parts=re.findall(r'\(\) -> \{.*?\n          \}|host::\w+',actions,re.S)
+assert len(labels)==len(parts),(len(labels),len(parts))
+rows=[]
+for label,action in zip(labels,parts):
+ match=re.search(r'host.readDrawing\(\)\.(\w+)\(([-\d,\s]*)\)',action)
+ if not match:continue
+ method,args=match.groups();method={'grayscaleFromChannelActive':'desaturateChannelActive'}.get(method,method)
+ method='native'+method[0].upper()+method[1:]
+ assert method in (generated/'DrawingView.java').read_text(),method
+ rows.append('add(menu,'+json.dumps(label,ensure_ascii=False)+',()->execute.accept(()->DrawingView.'+method+'('+args+')));')
+(generated/'DesktopColorPresets.java').write_text('''package art.velyntora.core;
+public final class DesktopColorPresets {public static javax.swing.JMenu menu(java.util.function.Consumer<java.util.concurrent.Callable<Boolean>> execute){javax.swing.JMenu menu=new javax.swing.JMenu("Acciones rápidas de Android");'''+''.join(rows)+'''return menu;}private static void add(javax.swing.JMenu menu,String label,Runnable action){javax.swing.JMenuItem item=new javax.swing.JMenuItem(label);item.addActionListener(e->action.run());menu.add(item);}}
+''')
+for name in ['FilledRectangleIcon','FilledEllipseIcon','FilledRoundedRectangleIcon','FilledTriangleIcon']:
+ source=next((root/'engine/tools').rglob(name+'.java')).read_text().replace('package art.velyntora.core;','package app.velyntora.windows.tools;').replace('import android.graphics.*;','').replace('extends ToolIcon','extends DesktopToolIcon')
+ (icon_dir/(name+'.java')).write_text(source)
+p=icon_dir/'ToolIcons.java';s=p.read_text();p.write_text(s[:-1]+'''public static javax.swing.Icon figure(Tool tool,boolean filled){if(!filled)return of(tool);return switch(tool){case RECT->new FilledRectangleIcon();case ELLIPSE->new FilledEllipseIcon();case ROUNDRECT->new FilledRoundedRectangleIcon();case TRIANGLE->new FilledTriangleIcon();default->of(tool);};}}''')

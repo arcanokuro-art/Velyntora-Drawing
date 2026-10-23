@@ -1,2 +1,3 @@
 package art.velyntora.core;
-public final class DesktopGradients {public static int[] create(int w,int h,float x0,float y0,float x1,float y1,int first,int second,int mode){return GradientRaster.create(w,h,x0,y0,x1,y1,first,second,mode);}}
+/** Reuse Core gradient interpolation in strips, including a full 6000 x 6000 canvas. */
+public final class DesktopGradients {public static int[] create(int w,int h,float x0,float y0,float x1,float y1,int first,int second,int mode){if(!art.velyntora.core.document.CanvasLimits.accepts(w,h))throw new IllegalArgumentException("Dimensiones no válidas");if((long)w*h<=4000000)return GradientRaster.create(w,h,x0,y0,x1,y1,first,second,mode);int[] data=new int[2+w*h];data[0]=w;data[1]=h;int strip=Math.max(1,4000000/w);for(int y=0;y<h;y+=strip){int rows=Math.min(strip,h-y);int[] part=GradientRaster.create(w,rows,x0,y0-y,x1,y1-y,first,second,mode);System.arraycopy(part,2,data,2+y*w,w*rows);}return data;}}

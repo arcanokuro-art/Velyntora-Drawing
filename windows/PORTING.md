@@ -20,3 +20,28 @@ Esta tabla describe el código implementado en Windows. No representa una promes
 | Inicio y distribución | Imagen, logo transparente, crédito Zaskar Startup, recientes, runtime incluido y ejecutable V-Drawing | Inicio/editor renderizados y pruebas repetidas desde el ejecutable empaquetado |
 
 No se modifica ni se mezcla `main`: este trabajo pertenece a `windows`.
+
+## Auditoría adicional de controles Android → Windows
+
+La referencia es el código Android incluido en `engine/app/src/main/java` y las herramientas de `engine/tools`. La rama Windows comparte el motor C++ de ese árbol. Las interfaces Android y Swing son implementaciones distintas.
+
+| Control o comportamiento de Android | Ubicación Windows | Comprobación |
+|---|---|---|
+| HSV, RGB, alfa, hexadecimal RGBA, rueda y cuadrado | `color/ColorPicker.java` | Conversión hexadecimal, cambios de alfa e independencia del secundario |
+| 22 colores predeterminados y colores guardados | `color/PalettePanel.java` | Misma paleta, persistencia, duplicados y eliminación |
+| Elegir principal/secundario y eliminar color | Menús contextuales de las muestras | Acciones implementadas en cada muestra |
+| Iconos locales y figuras rellenas | `tools/DesktopToolIcon.java`, generación desde los originales | Rasterización de todos los iconos; clases generadas desde la fuente Android |
+| Orden de herramientas y figuras agrupadas | `tools/Tool.java`, `EditorWindow.figureMenu` | Catálogo explícito, nueve opciones de figura |
+| Selección de pincel por categoría | `brushes/BrushSelector.java` | Mismo catálogo de 34 presets y recursos originales |
+| Punta cuadrada, presión, opacidad, dureza | `ToolSettings`, `CanvasPanel`, configuración del pincel | Valores por herramienta y persistencia; conexión a los renderizadores nativos |
+| Capas con miniatura, nombre, visibilidad, opacidad y mezcla | `layers/LayersPanel.java` | Miniatura del motor real y pruebas nativas de persistencia |
+| Coordenadas, giro, dimensiones, zoom y documento | `EditorWindow.status`, `CanvasPanel.cursorStatus` | Actualización por eventos y cambio de documento |
+| Crear con presets; escala proporcional/porcentaje; remuestreo y anclaje | `document/DimensionsDialog.java` | Valores de remuestreo/anclaje y llamada al mismo motor de redimensionado |
+| Cola de trabajo, progreso e historial | `tasks/WorkQueue.java` | Orden, devolución de resultados y propagación de fallos; EDT disponible durante ejecución |
+| Mover contorno sin mover píxeles | `CanvasPanel.moveSelectionMask` | Máscara desplazada, píxeles y revisión intactos |
+| Deshacer/rehacer borrador y curva confirmada | `CanvasPanel` | Gestos de línea, revisión nativa, confirmar, deshacer y rehacer |
+| Acciones rápidas de color con valores originales | `DesktopColorPresets` generado | Etiquetas y argumentos extraídos del menú Android; métodos JNI comprobados al generar |
+| Guardar como y exportadores con selector | `EditorWindow`, `DocumentIO` | Exportación fallida conserva el archivo anterior |
+| Cambiar de documento descarta borradores y máscaras anteriores | `CanvasPanel.resetDocumentState` | Máscaras y selección reiniciadas |
+
+Las suites automáticas comprueban casos concretos, no una ausencia universal de fallos. No se ha realizado aquí una evaluación física de todas las tabletas ni una comparación visual píxel a píxel de cada control entre ambos sistemas.

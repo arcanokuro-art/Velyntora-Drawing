@@ -9,6 +9,7 @@ public final class WorkQueue {
  private record Job(String message,Callable<?> work,Runnable complete){}
  public WorkQueue(JFrame owner){this.owner=owner;}
  public boolean busy(){return running;}
+ @SuppressWarnings("unchecked") public <T>T call(String message,Callable<T> action)throws Exception{if(running)throw new IllegalStateException("Espera a que termine la operación actual");Object[] result={null};Exception[] error={null};submit(message,()->{try{result[0]=action.call();}catch(Exception failure){error[0]=failure;}return true;},()->{});if(error[0]!=null)throw error[0];return (T)result[0];}
  public void submit(String message,Callable<?> work,Runnable complete){if(!SwingUtilities.isEventDispatchThread())throw new IllegalStateException("Queue must be used on EDT");if(closed)return;pending.add(new Job(message,work,complete));if(!running)next();}
  public void close(){closed=true;pending.clear();}
  private void next(){Job job=pending.poll();if(job==null||closed){running=false;return;}running=true;activity.accept(true);

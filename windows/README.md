@@ -17,7 +17,7 @@ Extrae **todo** Velyntora-Drawing-Windows-x64.zip y abre `V-Drawing/V-Drawing.ex
 
 El motor se compila directamente desde `engine/`: no se reemplazan los algoritmos por otro motor. Se generan 125 declaraciones JNI a partir de Android y se incluyen los 34 presets de punta además del pincel clásico. Se conserva la atribución y procedencia de los recursos de Core.
 
-## Funciones del piloto
+## Funciones de escritorio
 
 Inicio con imagen, logo transparente, aviso piloto y Powered By Zaskar Startup; nuevo lienzo hasta 6000 × 6000; PNG/JPEG/BMP/GIF/TIFF según los códecs de ImageIO; guardado/reapertura VLYCORE con capas; pinceles, lápiz, goma, cubo, selector, clonar, recoloración, figuras, texto editable, selecciones, varita, degradado, capas y mezclas; ajustes de color; deshacer/rehacer; zoom hasta 7000% con píxeles definidos; rotación y desplazamiento.
 
@@ -42,3 +42,13 @@ La versión es piloto y no tiene firma comercial. Las pruebas automáticas compr
 ## Compilar
 
 Windows x64, JDK 17, Python 3.12 y GCC/CMake/Ninja de MSYS2 MINGW64 en PATH. Ejecuta `windows/scripts/build.ps1` desde la raíz. GitHub Actions compila y prueba en un servidor Windows real, abre el ejecutable empaquetado y publica el ZIP sólo si las comprobaciones pasan.
+
+## Correspondencia de controles con Android (0.4.0)
+
+El editor incluye los iconos vectoriales originales y el mismo orden en dos columnas; figuras agrupadas con y sin relleno; pinceles por categorías; punta cuadrada y presión activable; selector HSV/RGBA con hexadecimal y rueda/cuadrado; paleta predeterminada y colores guardados con principal/secundario/eliminar. Clic derecho equivale al menú de pulsación prolongada en la paleta.
+
+Las capas muestran miniaturas reales con transparencia. La barra inferior informa coordenadas, dimensiones, zoom y giro; el título identifica el documento, cambios pendientes y bytes de píxeles asignados en las capas (no es una medida del consumo total del proceso).
+
+Tamaño de imagen incluye mantener proporciones, porcentaje y remuestreo; tamaño del lienzo incluye nueve anclajes. Las operaciones de archivos, capas, selección, efectos e historial usan una cola de trabajo con progreso. Mover selección desplaza el contorno; mover píxeles desplaza contenido. Línea/Curva tiene historial de borrador y recuperación editable después de confirmar y deshacer. Guardar como crea otro destino; la exportación solo reemplaza el archivo al terminar correctamente.
+
+`ParitySmoke` verifica estos comportamientos junto con las suites originales de Core. El alcance y sus límites se documentan en `PORTING.md`; la prueba de presión con hardware físico permanece separada de las comprobaciones de código y distribución.

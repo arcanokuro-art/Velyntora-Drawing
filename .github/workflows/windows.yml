@@ -60,7 +60,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { gh release create windows-pilot --target windows --title 'Velyntora Drawing · Piloto Windows x64' --notes 'Extrae todo el ZIP y ejecuta V-Drawing.exe. Incluye su entorno Java y el motor C++ original. Piloto de escritorio; consulta windows/README.md para el alcance.' --prerelease }
           $source = git rev-parse HEAD
           $notes = Join-Path $env:RUNNER_TEMP 'windows-release-notes.md'
-          @("Velyntora Drawing 0.3.0 para Windows x64.", "", "Incluye MI-GAN sin conexión, formatos, objetos editables, efectos y herramientas de Core.", "Extrae todo el ZIP y abre V-Drawing.exe.", "", "Fuente comprobada: https://github.com/${{ github.repository }}/commit/$source", "La presión de tableta requiere validación física con el dispositivo.") | Set-Content -Encoding utf8 $notes
+          @("Velyntora Drawing 0.4.0 para Windows x64.", "", "Incluye MI-GAN sin conexión, formatos, objetos editables, efectos y herramientas de Core; selector HSV/RGBA, paleta completa, iconos originales, miniaturas y operaciones en segundo plano.", "Extrae todo el ZIP y abre V-Drawing.exe.", "", "Fuente comprobada: https://github.com/${{ github.repository }}/commit/$source", "La presión de tableta requiere validación física con el dispositivo.") | Set-Content -Encoding utf8 $notes
           gh release edit windows-pilot --notes-file $notes
           gh api "repos/${{ github.repository }}/git/refs/tags/windows-pilot" --method PATCH -f "sha=$source" -F force=true
           if ($LASTEXITCODE -ne 0) { throw 'Windows release source update failed' }
