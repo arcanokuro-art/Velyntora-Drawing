@@ -16,7 +16,7 @@ Copy-Item windows/build/native/velyntora_desktop.dll windows/build/input/
 python windows/scripts/manifest.py
 jar --create --file windows/build/input/Velyntora-Drawing.jar --manifest windows/build/manifest.mf -C windows/build/classes . -C windows/build/resources .
 if ($LASTEXITCODE -ne 0) { throw 'JAR failed' }
-java '-Djava.library.path=windows/build/input' "-Dvelyntora.assets=$env:VELYNTORA_BUILD_INPUT" -cp 'windows/build/classes;windows/build/resources;windows/build/input/*' DesktopSmoke
+java '-Dvelyntora.uiCapture=windows/build/editor-preview.png' '-Djava.library.path=windows/build/input' "-Dvelyntora.assets=$env:VELYNTORA_BUILD_INPUT" -cp 'windows/build/classes;windows/build/resources;windows/build/input/*' DesktopSmoke
 if ($LASTEXITCODE -ne 0) { throw 'Windows smoke tests failed' }
 jpackage --type app-image --dest windows/build/distribution --input windows/build/input --name V-Drawing --main-jar Velyntora-Drawing.jar --app-version 0.4.0 --vendor 'Zaskar Startup' --description 'Velyntora Drawing - Piloto Windows' --java-options '-Xmx2g' --java-options '-Djava.library.path=$APPDIR' --java-options '-Dvelyntora.assets=$APPDIR'
 if ($LASTEXITCODE -ne 0) { throw 'Packaging failed' }

@@ -6,6 +6,8 @@ import javax.swing.*;
 public final class DesktopSmoke {
  static void check(boolean value,String description){if(!value)throw new AssertionError(description);}
  public static void main(String[] args)throws Exception{
+  SwingUtilities.invokeAndWait(()->{try{app.velyntora.windows.app.EditorTheme.install();}catch(Exception error){throw new IllegalStateException(error);}});
+  ThemeSmoke.run();
   Path folder=Files.createTempDirectory("velyntora-windows-");DrawingView.nativeHistoryDirectory(folder.toString());
   check(DrawingView.nativeCreate(128,96),"native create");long empty=DrawingView.nativeRevision();DrawingView.nativeBeginEdit();DrawingView.nativeStyledStroke(10,10,50,40,4,0xffff0000,1,1,false,false);check(DrawingView.nativeRevision()!=empty,"revision");check(DrawingView.nativePixels()[10*128+10]==0xffff0000,"native stroke");check(DrawingView.nativeUndo(),"undo");check(DrawingView.nativePixels()[10*128+10]==0xffffffff,"undo pixels");check(DrawingView.nativeRedo(),"redo");
   check(DrawingView.nativeAddLayer(),"layers");check(DrawingView.nativeRenameLayer(1,"Capa 日本 🖌"),"unicode layer name");
@@ -17,6 +19,7 @@ public final class DesktopSmoke {
   ParitySmoke.run();
   DrawingView.nativeCreate(32,24);
   SwingUtilities.invokeAndWait(()->{try{var home=new app.velyntora.windows.app.HomeWindow();home.setVisible(true);check(home.isShowing(),"Windows home");var editor=new app.velyntora.windows.app.EditorWindow(home);editor.setVisible(true);app.velyntora.windows.input.PointerInput.attach(editor);editor.refresh();editor.canvas.setSize(800,600);editor.canvas.zoom=1;editor.canvas.rotation=0;editor.canvas.offsetX=editor.canvas.offsetY=0;
+    String capture=System.getProperty("velyntora.uiCapture");if(capture!=null){editor.validate();BufferedImage windowImage=new BufferedImage(editor.getWidth(),editor.getHeight(),BufferedImage.TYPE_INT_RGB);java.awt.Graphics2D graphics=windowImage.createGraphics();editor.paint(graphics);graphics.dispose();javax.imageio.ImageIO.write(windowImage,"png",Path.of(capture).toFile());}
     var canvas=editor.canvas;long before=DrawingView.nativeRevision();canvas.tool=app.velyntora.windows.tools.Tool.BRUSH;
     canvas.dispatchEvent(new java.awt.event.MouseEvent(canvas,java.awt.event.MouseEvent.MOUSE_PRESSED,System.currentTimeMillis(),java.awt.event.InputEvent.BUTTON1_DOWN_MASK,5,5,1,false,java.awt.event.MouseEvent.BUTTON1));
     canvas.dispatchEvent(new java.awt.event.MouseEvent(canvas,java.awt.event.MouseEvent.MOUSE_DRAGGED,System.currentTimeMillis(),java.awt.event.InputEvent.BUTTON1_DOWN_MASK,10,10,0,false,java.awt.event.MouseEvent.NOBUTTON));
