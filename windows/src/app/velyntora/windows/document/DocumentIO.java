@@ -9,7 +9,7 @@ import java.util.prefs.Preferences;
 public final class DocumentIO {
  private static final Preferences prefs=Preferences.userRoot().node("app/velyntora/drawing/windows");
  public static java.util.List<String> recent(){String all=prefs.get("recent","");return Arrays.stream(all.split("\\n")).filter(s->!s.isBlank()&&Files.exists(Path.of(s))).toList();}
- public static void remember(Path path){java.util.List<String> paths=new ArrayList<>(recent());paths.remove(path.toAbsolutePath().toString());paths.add(0,path.toAbsolutePath().toString());prefs.put("recent",String.join("\n",paths.subList(0,Math.min(paths.size(),8))));}
+ public static void remember(Path path){if(!app.velyntora.windows.app.home.HomePreferences.rememberRecent())return;java.util.List<String> paths=new ArrayList<>(recent());paths.remove(path.toAbsolutePath().toString());paths.add(0,path.toAbsolutePath().toString());prefs.put("recent",String.join("\n",paths.subList(0,Math.min(paths.size(),8))));}
  public static void open(Path path)throws Exception{
   if(path.toString().toLowerCase().endsWith(".vlycore")){if(!DrawingView.nativeProjectPath(path.toAbsolutePath().toString(),false))throw new java.io.IOException("Proyecto no compatible o dañado");}
   else if(art.velyntora.core.DesktopFormats.extension(path).equals("ora")){art.velyntora.core.DesktopFormats.openOra(path);}

@@ -52,6 +52,7 @@ jobs:
           path: |
             windows/build/Velyntora-Drawing-Windows-x64.zip
             windows/build/editor-preview.png
+            windows/build/home-preview.png
           if-no-files-found: error
       - name: Publicar piloto Windows
         if: github.ref == 'refs/heads/windows'
