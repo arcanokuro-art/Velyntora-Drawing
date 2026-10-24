@@ -1,0 +1,94 @@
+name: Linux x64
+on:
+  push:
+    branches: [linux]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: linux-desktop
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencias nativas y empaquetado
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libx11-dev libxi-dev xvfb xauth fakeroot libgtk-3-0 libasound2 libxtst6
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            linux/build/input/migan_pipeline_v2.onnx
+          key: linux-desktop-${{ hashFiles('windows/pom.xml') }}-migan-v2
+      - name: Compilar, probar y empaquetar Linux
+        run: bash linux/scripts/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Velyntora-Drawing-Linux-x64
+          if-no-files-found: error
+          path: |
+            linux/build/Velyntora-Drawing-Linux-x64.tar.gz
+            linux/build/velyntora-drawing_0.4.0_amd64.deb
+            linux/build/SHA256SUMS
+  compatibility:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Bibliotecas del escritorio y pantalla de prueba
+        run: sudo apt-get update && sudo apt-get install -y xvfb xauth libxi6 libgtk-3-0t64 libasound2t64 libxtst6
+      - uses: actions/download-artifact@v4
+        with:
+          name: Velyntora-Drawing-Linux-x64
+          path: package
+      - name: Verificar portable en Ubuntu 24.04 sin Java del sistema
+        shell: bash
+        run: |
+          cd package
+          sha256sum --check SHA256SUMS
+          mkdir 'Ruta portátil 日本'
+          tar -xzf Velyntora-Drawing-Linux-x64.tar.gz -C 'Ruta portátil 日本'
+          unset JAVA_HOME
+          marker="$PWD/portable-test.txt"
+          xvfb-run -a './Ruta portátil 日本/V-Drawing/V-Drawing.sh' --self-test "$marker"
+          grep -qx ok "$marker"
+      - name: Instalar y comprobar el DEB
+        shell: bash
+        run: |
+          sudo apt-get install -y ./package/velyntora-drawing_0.4.0_amd64.deb
+          executable=$(dpkg -L velyntora-drawing | awk '/\/bin\/V-Drawing$/ {print; exit}')
+          test -n "$executable"
+          marker="$PWD/deb-test.txt"
+          xvfb-run -a "$executable" --self-test "$marker"
+          grep -qx ok "$marker"
+  publish:
+    needs: [build, compatibility]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Velyntora-Drawing-Linux-x64
+          path: package
+      - name: Publicar portable y DEB comprobados
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view linux-pilot >/dev/null 2>&1; then
+            gh release create linux-pilot --target '${{ github.sha }}' --title 'Velyntora Drawing · Linux x64' --notes 'Linux x64' --prerelease
+          fi
+          printf '%s\n' 'Velyntora Drawing 0.4.0 para Linux x64.' '' 'Portable: extrae todo el TAR.GZ y ejecuta V-Drawing/V-Drawing.sh. Incluye Java, motor C++ y MI-GAN sin conexión.' 'DEB: paquete instalable para Debian/Ubuntu.' '' 'Compilado en Ubuntu 22.04 y comprobado en Ubuntu 24.04, incluyendo el ejecutable extraído y el DEB instalado.' 'Requiere X11 o XWayland. La presión de tableta requiere validación física.' '' 'Fuente comprobada: https://github.com/${{ github.repository }}/commit/${{ github.sha }}' > notes.md
+          gh release edit linux-pilot --notes-file notes.md
+          gh api 'repos/${{ github.repository }}/git/refs/tags/linux-pilot' --method PATCH -f sha='${{ github.sha }}' -F force=true
+          gh release upload linux-pilot package/* --clobber

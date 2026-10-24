@@ -7,7 +7,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.prefs.Preferences;
 public final class DocumentIO {
- private static final Preferences prefs=Preferences.userRoot().node("app/velyntora/drawing/windows");
+ private static final Preferences prefs=Preferences.userRoot().node("app/velyntora/drawing/"+(app.velyntora.windows.app.DesktopPlatform.linux()?"linux":"windows"));
  public static java.util.List<String> recent(){String all=prefs.get("recent","");return Arrays.stream(all.split("\\n")).filter(s->!s.isBlank()&&Files.exists(Path.of(s))).toList();}
  public static void remember(Path path){java.util.List<String> paths=new ArrayList<>(recent());paths.remove(path.toAbsolutePath().toString());paths.add(0,path.toAbsolutePath().toString());prefs.put("recent",String.join("\n",paths.subList(0,Math.min(paths.size(),8))));}
  public static void open(Path path)throws Exception{

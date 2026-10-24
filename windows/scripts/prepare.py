@@ -1,7 +1,7 @@
 from pathlib import Path
-import re,json,shutil
+import re,json,shutil,os
 from PIL import Image
-root=Path(__file__).resolve().parents[2];build=root/'windows/build';generated=build/'generated/art/velyntora/core';generated.mkdir(parents=True,exist_ok=True)
+root=Path(__file__).resolve().parents[2];build=Path(os.environ.get('VELYNTORA_DESKTOP_BUILD',str(root/'windows/build')));generated=build/'generated/art/velyntora/core';generated.mkdir(parents=True,exist_ok=True)
 source=(root/'engine/app/src/main/java/art/velyntora/core/DrawingView.java').read_text()
 methods=re.findall(r'  static native [^;]+;',source)
 assert len(methods)>100
@@ -59,9 +59,9 @@ shutil.copyfile(brushroot/'provenance.json',licenses/'brush-provenance.json')
 Image.open(root/'engine/tools/remove_ai/assets/remove_ai/remove_ai.webp').save(resources/'remove_ai.png')
 import subprocess
 input_dir=build/'input';input_dir.mkdir(exist_ok=True)
-provenance={'application':'Velyntora Drawing','version':'0.4.0','branch':'windows','commit':subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip(),'core_commit':json.loads((root/'docs/core-source.json').read_text())['commit'],'migan_sha256':'6f1f3530a1a2324b19752018ce756088b07973cda8d7d890034ace5c8a48c40b'}
+provenance={'application':'Velyntora Drawing','version':'0.4.0','branch':os.environ.get('VELYNTORA_PLATFORM','windows'),'commit':subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip(),'core_commit':json.loads((root/'docs/core-source.json').read_text())['commit'],'migan_sha256':'6f1f3530a1a2324b19752018ce756088b07973cda8d7d890034ace5c8a48c40b'}
 (input_dir/'BUILD-INFO.json').write_text(json.dumps(provenance,indent=2)+'\n')
-shutil.copyfile(root/'windows/README.md',input_dir/'LEEME.md')
+shutil.copyfile(root/('linux/README.md' if os.environ.get('VELYNTORA_PLATFORM')=='linux' else 'windows/README.md'),input_dir/'LEEME.md')
 shutil.copytree(licenses,input_dir/'licenses',dirs_exist_ok=True)
 shutil.copyfile(root/'engine/app/src/main/java/art/velyntora/core/document/importing/ImageImportSize.java',generated/'ImageImportSize.java')
 shutil.copyfile(root/'engine/tests/ImageImportSizeTests.java',generated/'ImageImportSizeTests.java')

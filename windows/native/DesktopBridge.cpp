@@ -1,14 +1,34 @@
 #include "win_posix.hpp"
 #include "../../engine/app/src/main/cpp/native_bridge.cpp"
 #include <fcntl.h>
+#include <filesystem>
+#ifdef _WIN32
 #include <io.h>
+#else
+#include <unistd.h>
+#endif
+namespace {
+int openJavaPath(JNIEnv* env,jstring path,bool save){
+ const jchar* chars=env->GetStringChars(path,nullptr);if(!chars)return -1;
+ std::u16string text(reinterpret_cast<const char16_t*>(chars),env->GetStringLength(path));env->ReleaseStringChars(path,chars);
+ try{
+#ifdef _WIN32
+  std::wstring name(text.begin(),text.end());return _wopen(name.c_str(),save?(_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY):(_O_RDONLY|_O_BINARY),_S_IREAD|_S_IWRITE);
+#else
+  std::string name=std::filesystem::path(text).string();return open(name.c_str(),save?(O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC):(O_RDONLY|O_CLOEXEC),0600);
+#endif
+ }catch(...){return -1;}
+}
+void closeJavaFile(int fd){
+#ifdef _WIN32
+ _close(fd);
+#else
+ close(fd);
+#endif
+}
+}
 extern "C" JNIEXPORT jboolean JNICALL Java_art_velyntora_core_DrawingView_nativeProjectPath(JNIEnv* env,jclass cls,jstring path,jboolean save){
-    const jchar* text=env->GetStringChars(path,nullptr);if(!text)return JNI_FALSE;
-    std::wstring filename(reinterpret_cast<const wchar_t*>(text),env->GetStringLength(path));
-    int fd=_wopen(filename.c_str(),save?(_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY):(_O_RDONLY|_O_BINARY),_S_IREAD|_S_IWRITE);
-    env->ReleaseStringChars(path,text);if(fd<0)return JNI_FALSE;
-    auto result=save?Java_art_velyntora_core_DrawingView_nativeSaveProject(env,cls,fd):Java_art_velyntora_core_DrawingView_nativeOpenProject(env,cls,fd);
-    _close(fd);return result;
+ int fd=openJavaPath(env,path,save);if(fd<0)return JNI_FALSE;auto result=save?Java_art_velyntora_core_DrawingView_nativeSaveProject(env,cls,fd):Java_art_velyntora_core_DrawingView_nativeOpenProject(env,cls,fd);closeJavaFile(fd);return result;
 }
 extern "C" JNIEXPORT jboolean JNICALL Java_art_velyntora_core_DrawingView_nativeStageObject(JNIEnv* env,jclass,jbyteArray encoded,jfloatArray transform,jbyteArray content,jintArray style){
  std::lock_guard<std::mutex> lock(guard);if(!placedImage||!encoded||!transform||env->GetArrayLength(transform)!=9)return JNI_FALSE;
@@ -21,6 +41,7 @@ extern "C" JNIEXPORT jbyteArray JNICALL Java_art_velyntora_core_DrawingView_nati
  std::lock_guard<std::mutex> lock(guard);if(!layers||index<0||std::size_t(index)>=layers->layerCount()||!layers->layer(index).image)return nullptr;
  try{auto source=layers->layer(index).image->source;auto out=env->NewByteArray(source->bytes);if(!out)return nullptr;std::size_t at=0;source->write([&](const void* data,std::size_t n){env->SetByteArrayRegion(out,at,n,reinterpret_cast<const jbyte*>(data));at+=n;});return out;}catch(...){return nullptr;}
 }
+#ifdef _WIN32
 #include <windows.h>
 #include <atomic>
 #include <unordered_map>
@@ -36,8 +57,11 @@ BOOL CALLBACK attachPenChild(HWND hwnd,LPARAM){attachPenWindow(hwnd);return TRUE
 }
 extern "C" JNIEXPORT void JNICALL Java_art_velyntora_core_DrawingView_nativeAttachPointer(JNIEnv*,jclass,jlong value){HWND hwnd=reinterpret_cast<HWND>(static_cast<std::intptr_t>(value));attachPenWindow(hwnd);EnumChildWindows(hwnd,attachPenChild,0);}
 extern "C" JNIEXPORT jfloat JNICALL Java_art_velyntora_core_DrawingView_nativePointerPressure(JNIEnv*,jclass){return GetTickCount64()-penTime.load()<500?penPressure.load():1.f;}
+#else
+#include "../../linux/native/LinuxPointer.hpp"
+#endif
 extern "C" JNIEXPORT jboolean JNICALL Java_art_velyntora_core_DrawingView_nativeRecoveryPath(JNIEnv* env,jclass cls,jstring path,jlong expected){
- const jchar* chars=env->GetStringChars(path,nullptr);if(!chars)return JNI_FALSE;std::wstring file(reinterpret_cast<const wchar_t*>(chars),env->GetStringLength(path));env->ReleaseStringChars(path,chars);int fd=_wopen(file.c_str(),_O_CREAT|_O_TRUNC|_O_WRONLY|_O_BINARY,_S_IREAD|_S_IWRITE);if(fd<0)return JNI_FALSE;auto result=Java_art_velyntora_core_DrawingView_nativeSaveRecovery(env,cls,fd,expected);_close(fd);return result;
+ int fd=openJavaPath(env,path,true);if(fd<0)return JNI_FALSE;auto result=Java_art_velyntora_core_DrawingView_nativeSaveRecovery(env,cls,fd,expected);closeJavaFile(fd);return result;
 }
 // Actual allocated pixel payload in the current layer set (not a dense canvas estimate).
 extern "C" JNIEXPORT jlong JNICALL Java_art_velyntora_core_DrawingView_nativeDocumentBytes(JNIEnv*,jclass){
