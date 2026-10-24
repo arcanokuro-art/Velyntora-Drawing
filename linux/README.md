@@ -45,3 +45,5 @@ La primera adaptación visual usa el mismo estilo de la vista previa de Windows:
 Esta etapa no constituye todavía equivalencia visual completa con Android. Las pruebas de Linux se ejecutan con el tema instalado y comprueban apertura, funciones del motor y paquetes; la apariencia a distintas escalas y las tabletas requieren comprobación interactiva.
 
 El espacio de trabajo conserva ahora la disposición de Android: herramientas sin recuadros, controles con valores, colores grandes y paleta inferior, seis acciones de capas y visibilidad por fila. Propiedades: doble clic, menú contextual o Capas. F11 activa pantalla completa. Se verifican capturas a 1366 × 768 y 1536 × 960.
+
+Inicio compartido con Windows siguiendo la referencia: proporción 36/64, ilustración oscurecida al 40 %, acciones grandes, tarjeta de recientes con estado vacío y lista completa, preferencias persistentes y ayuda. F11 activa pantalla completa. Se verifican distribuciones de 850 × 580, 1366 × 768 y 1536 × 960 y se guardan renders del inicio.

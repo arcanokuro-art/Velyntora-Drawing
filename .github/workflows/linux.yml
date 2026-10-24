@@ -42,7 +42,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Linux-UI-preview
-          path: linux/build/editor-preview.png
+          path: |
+            linux/build/editor-preview.png
+            linux/build/home-preview.png
           if-no-files-found: error
   compatibility:
     needs: build

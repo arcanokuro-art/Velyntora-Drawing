@@ -8,6 +8,7 @@ public final class DesktopSmoke {
  public static void main(String[] args)throws Exception{
   SwingUtilities.invokeAndWait(()->{try{app.velyntora.windows.app.EditorTheme.install();}catch(Exception error){throw new IllegalStateException(error);}});
   ThemeSmoke.run();
+  HomeSmoke.run();
   Path folder=Files.createTempDirectory("velyntora-windows-");DrawingView.nativeHistoryDirectory(folder.toString());
   check(DrawingView.nativeCreate(128,96),"native create");long empty=DrawingView.nativeRevision();DrawingView.nativeBeginEdit();DrawingView.nativeStyledStroke(10,10,50,40,4,0xffff0000,1,1,false,false);check(DrawingView.nativeRevision()!=empty,"revision");check(DrawingView.nativePixels()[10*128+10]==0xffff0000,"native stroke");check(DrawingView.nativeUndo(),"undo");check(DrawingView.nativePixels()[10*128+10]==0xffffffff,"undo pixels");check(DrawingView.nativeRedo(),"redo");
   check(DrawingView.nativeAddLayer(),"layers");check(DrawingView.nativeRenameLayer(1,"Capa 日本 🖌"),"unicode layer name");
