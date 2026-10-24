@@ -29,7 +29,7 @@ javac -encoding UTF-8 -cp "$BUILD/input/*" -d "$BUILD/classes" "${SOURCES[@]}"
 cp "$BUILD/native/libvelyntora_desktop.so" "$BUILD/input/"
 python3 windows/scripts/manifest.py
 jar --create --file "$BUILD/input/Velyntora-Drawing.jar" --manifest "$BUILD/manifest.mf" -C "$BUILD/classes" . -C "$BUILD/resources" .
-xvfb-run -a java -Djava.library.path="$BUILD/input" -Dvelyntora.assets="$BUILD/input" -cp "$BUILD/classes:$BUILD/resources:$BUILD/input/*" LinuxSmoke
+xvfb-run -a java -Dvelyntora.uiCapture="$BUILD/editor-preview.png" -Djava.library.path="$BUILD/input" -Dvelyntora.assets="$BUILD/input" -cp "$BUILD/classes:$BUILD/resources:$BUILD/input/*" LinuxSmoke
 jpackage --type app-image --dest "$BUILD/distribution" --input "$BUILD/input" --name V-Drawing --main-jar Velyntora-Drawing.jar --app-version 0.4.0 --vendor 'Zaskar Startup' --description 'Velyntora Drawing para Linux' --java-options '-Xmx2g' --java-options '-Djava.library.path=$APPDIR' --java-options '-Dvelyntora.assets=$APPDIR' --java-options '-Dvelyntora.selftest=LinuxSmoke'
 cp linux/scripts/V-Drawing.sh "$BUILD/distribution/V-Drawing/"
 cp linux/README.md "$BUILD/distribution/V-Drawing/LEEME.md"

@@ -39,6 +39,11 @@ jobs:
             linux/build/Velyntora-Drawing-Linux-x64.tar.gz
             linux/build/velyntora-drawing_0.4.0_amd64.deb
             linux/build/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Linux-UI-preview
+          path: linux/build/editor-preview.png
+          if-no-files-found: error
   compatibility:
     needs: build
     runs-on: ubuntu-24.04

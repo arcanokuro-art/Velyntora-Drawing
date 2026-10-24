@@ -7,6 +7,7 @@ methods=re.findall(r'  static native [^;]+;',source)
 assert len(methods)>100
 (generated/'DrawingView.java').write_text('package art.velyntora.core;\npublic final class DrawingView {\n static {System.loadLibrary("velyntora_desktop");}\n'+ '\n'.join('public '+m.strip() for m in methods)+'\n public static native boolean nativeProjectPath(String path,boolean save);\n}\n')
 resources=build/'resources';resources.mkdir(parents=True,exist_ok=True)
+shutil.copytree(root/'windows/resources/fonts',resources/'fonts',dirs_exist_ok=True)
 image=root/'app/src/main/res/drawable-nodpi'
 Image.open(image/'start_drawing.webp').save(resources/'start_drawing.png')
 logo=Image.open(image/'velyntora_logo.webp').convert('RGBA');logo.putdata([(r,g,b,0 if max(r,g,b)<28 else a) for r,g,b,a in logo.getdata()]);logo.save(resources/'logo.png')
