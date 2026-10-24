@@ -21,7 +21,7 @@ public final class CanvasPanel extends JPanel {
  private Point2D.Double cursor;
  public String cursorStatus(){return cursor==null?"—":String.format(java.util.Locale.ROOT,"%d, %d px",(int)Math.floor(cursor.x),(int)Math.floor(cursor.y));}
  public void resetDocumentState(){cancelCurve();draftUndo.clear();draftRedo.clear();savedCurves.clear();redoCurves.clear();clearSelection();clearRemoval();cursor=null;committedCurve.clear();committedOthers.clear();curveBefore=-1;cloneOriginReady=false;}
- public CanvasPanel(Runnable changed){this.changed=changed;var initial=app.velyntora.windows.tools.ToolSettings.load(tool);size=initial.width();opacity=initial.opacity();hardness=initial.hardness();square=initial.square();pressureEnabled=initial.pressure();setBackground(new Color(62,62,66));setFocusable(true);
+ public CanvasPanel(Runnable changed){this.changed=changed;var initial=app.velyntora.windows.tools.ToolSettings.load(tool);size=initial.width();opacity=initial.opacity();hardness=initial.hardness();square=initial.square();pressureEnabled=initial.pressure();setBackground(new Color(43,43,43));setFocusable(true);
   MouseAdapter input=new MouseAdapter(){
    public void mouseMoved(MouseEvent e){cursor=point(e);changed.run();}public void mouseExited(MouseEvent e){cursor=null;changed.run();}
    public void mousePressed(MouseEvent e){if(!isEnabled())return;requestFocusInWindow();if(SwingUtilities.isMiddleMouseButton(e)||tool==Tool.PAN){pan=e.getPoint();return;}Point2D.Double p=point(e);start=last=current=p;if(p==null)return;
