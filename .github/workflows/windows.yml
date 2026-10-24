@@ -1,12 +1,12 @@
 name: Windows x64
 on:
   push:
-    branches: [windows]
+    branches: [windows, codex/windows-android-design]
   workflow_dispatch:
 permissions:
   contents: write
 concurrency:
-  group: windows-pilot
+  group: windows-pilot-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   windows:
@@ -52,6 +52,7 @@ jobs:
           path: windows/build/Velyntora-Drawing-Windows-x64.zip
           if-no-files-found: error
       - name: Publicar piloto Windows
+        if: github.ref == 'refs/heads/windows'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
