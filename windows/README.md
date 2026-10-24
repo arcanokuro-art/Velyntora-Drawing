@@ -52,3 +52,9 @@ Las capas muestran miniaturas reales con transparencia. La barra inferior inform
 Tamaño de imagen incluye mantener proporciones, porcentaje y remuestreo; tamaño del lienzo incluye nueve anclajes. Las operaciones de archivos, capas, selección, efectos e historial usan una cola de trabajo con progreso. Mover selección desplaza el contorno; mover píxeles desplaza contenido. Línea/Curva tiene historial de borrador y recuperación editable después de confirmar y deshacer. Guardar como crea otro destino; la exportación solo reemplaza el archivo al terminar correctamente.
 
 `ParitySmoke` verifica estos comportamientos junto con las suites originales de Core. El alcance y sus límites se documentan en `PORTING.md`; la prueba de presión con hardware físico permanece separada de las comprobaciones de código y distribución.
+
+## Adaptación visual al diseño Android
+
+Primera etapa: paleta oscura propia independiente del tema del sistema; menú ☰ que conserva los menús y operaciones existentes; accesos a nuevo, abrir, guardar, deshacer, rehacer y capas; ancho con deslizador; herramientas con desplazamiento únicamente vertical; panel de capas más ancho y paleta compacta. Los atajos de teclado se conservan.
+
+La compilación Java y los límites modulares se verificaron en el entorno de desarrollo. Esta etapa todavía requiere revisión visual en Windows con distintas escalas de pantalla y resoluciones; no constituye una certificación de equivalencia visual completa con Android ni un nuevo portable verificado.
