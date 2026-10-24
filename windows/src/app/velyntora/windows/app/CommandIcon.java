@@ -8,6 +8,10 @@ public final class CommandIcon implements Icon {
  private static void line(Graphics2D g,int... points){Path2D p=new Path2D.Float();p.moveTo(points[0],points[1]);for(int i=2;i<points.length;i+=2)p.lineTo(points[i],points[i+1]);g.draw(p);}
  public void paintIcon(Component c,Graphics graphics,int x,int y){Graphics2D g=(Graphics2D)graphics.create();g.translate(x,y);g.setColor(c.isEnabled()?c.getForeground():Color.GRAY);g.setStroke(new BasicStroke(1.7f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
   switch(name){
+   case "target":g.drawOval(5,5,14,14);line(g,12,1,12,6);line(g,12,18,12,23);line(g,1,12,6,12);line(g,18,12,23,12);break;
+   case "fullscreen":line(g,4,20,20,4);line(g,14,4,20,4,20,10);line(g,4,14,4,20,10,20);break;
+   case "swap":line(g,3,7,20,7,16,3);line(g,21,17,4,17,8,21);break;
+   case "merge":line(g,12,2,12,15);line(g,7,10,12,15,17,10);line(g,4,17,4,21,20,21,20,17);break;
    case "menu":line(g,3,5,21,5);line(g,3,12,21,12);line(g,3,19,21,19);break;
    case "new":line(g,6,21,6,3,15,3,19,7,19,12);line(g,14,3,14,8,19,8);line(g,15,17,23,17);line(g,19,13,19,21);break;
    case "open":line(g,3,20,3,5,10,5,13,8,21,8,21,11);line(g,3,20,7,11,23,11,19,20,3,20);break;

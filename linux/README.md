@@ -43,3 +43,5 @@ CI compila en Ubuntu 22.04 y vuelve a ejecutar el paquete extraído en Ubuntu 24
 La primera adaptación visual usa el mismo estilo de la vista previa de Windows: tema oscuro propio independiente de GTK, menú ☰ con todas las operaciones anteriores, accesos superiores, deslizador de ancho, herramientas con desplazamiento vertical, panel de capas más ancho y paleta compacta. El código de escritorio reutilizado permanece en `windows/src`; Linux conserva su backend POSIX, rutas XDG y captura XInput2.
 
 Esta etapa no constituye todavía equivalencia visual completa con Android. Las pruebas de Linux se ejecutan con el tema instalado y comprueban apertura, funciones del motor y paquetes; la apariencia a distintas escalas y las tabletas requieren comprobación interactiva.
+
+El espacio de trabajo conserva ahora la disposición de Android: herramientas sin recuadros, controles con valores, colores grandes y paleta inferior, seis acciones de capas y visibilidad por fila. Propiedades: doble clic, menú contextual o Capas. F11 activa pantalla completa. Se verifican capturas a 1366 × 768 y 1536 × 960.
