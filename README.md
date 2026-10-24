@@ -1,3 +1,16 @@
+# Velyntora Drawing — Linux x64
+
+Esta rama `linux` adapta la aplicación de escritorio completa, con el mismo motor C++ y los módulos Java de dibujo, a Linux. `main` conserva Android y `windows` conserva Windows.
+
+- **Portable:** extraer `Velyntora-Drawing-Linux-x64.tar.gz` y ejecutar `V-Drawing/V-Drawing.sh`.
+- **Debian/Ubuntu:** instalar `velyntora-drawing_0.4.0_amd64.deb`.
+- Incluye Java 17, MI-GAN sin conexión, herramientas, pinceles, capas, formatos y recursos.
+- Linux x86-64, glibc 2.35+, X11 o XWayland. Compilación y comprobaciones en Ubuntu 22.04/24.04.
+- [Instrucciones, arquitectura y pruebas Linux](linux/README.md).
+- Compilar: `bash linux/scripts/build.sh`.
+
+## Base Android conservada en el repositorio
+
 # Velyntora Drawing — piloto integrado
 
 Nombre completo: Velyntora Drawing. Nombre bajo el icono: V-Drawing.

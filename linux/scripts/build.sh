@@ -17,6 +17,9 @@ printf '%s  %s\n' '6f1f3530a1a2324b19752018ce756088b07973cda8d7d890034ace5c8a48c
 python3 windows/scripts/prepare.py
 if [[ "${1:-}" == '--dependencies-only' ]]; then exit 0; fi
 python3 engine/scripts/check_modular_boundaries.py
+cmake -S engine/tests -B "$BUILD/core-tests" -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build "$BUILD/core-tests" --parallel 2
+ctest --test-dir "$BUILD/core-tests" --output-on-failure --parallel 2 --timeout 180
 cmake -S linux -B "$BUILD/native" -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build "$BUILD/native" --parallel 2
 rm -rf "$BUILD/classes" "$BUILD/distribution"
@@ -42,7 +45,7 @@ trap 'rm -rf "$relocated"' EXIT
 tar -xzf "$BUILD/Velyntora-Drawing-Linux-x64.tar.gz" -C "$relocated"
 xvfb-run -a "$relocated/V-Drawing/V-Drawing.sh" --self-test "$relocated/result.txt"
 grep -qx ok "$relocated/result.txt"
-jpackage --type deb --dest "$BUILD/distribution" --app-image "$BUILD/distribution/V-Drawing" --name V-Drawing --app-version 0.4.0 --vendor 'Zaskar Startup' --linux-package-name velyntora-drawing --linux-menu-group Graphics --linux-shortcut --description 'Ilustración, capas y edición de imágenes con Velyntora Core'
+jpackage --type deb --dest "$BUILD/distribution" --app-image "$BUILD/distribution/V-Drawing" --name V-Drawing --app-version 0.4.0 --vendor 'Zaskar Startup' --linux-package-name velyntora-drawing --linux-package-deps gnome-menus --linux-menu-group Graphics --linux-shortcut --description 'Ilustración, capas y edición de imágenes con Velyntora Core'
 mapfile -t DEBS < <(find "$BUILD/distribution" -maxdepth 1 -type f -name '*.deb')
 [[ ${#DEBS[@]} -eq 1 ]]
 cp "${DEBS[0]}" "$BUILD/velyntora-drawing_0.4.0_amd64.deb"

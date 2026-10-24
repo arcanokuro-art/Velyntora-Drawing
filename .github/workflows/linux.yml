@@ -58,6 +58,8 @@ jobs:
           mkdir 'Ruta portátil 日本'
           tar -xzf Velyntora-Drawing-Linux-x64.tar.gz -C 'Ruta portátil 日本'
           unset JAVA_HOME
+          export XDG_STATE_HOME="$PWD/Estado 日本"
+          export XDG_CACHE_HOME="$PWD/Caché 日本"
           marker="$PWD/portable-test.txt"
           xvfb-run -a './Ruta portátil 日本/V-Drawing/V-Drawing.sh' --self-test "$marker"
           grep -qx ok "$marker"

@@ -34,6 +34,6 @@ Los módulos Java se comparten desde `windows/src`; no se mantiene una copia div
 
 ## Compilar y comprobar
 
-JDK 17 completo, Python 3.12 con Pillow 12, Maven, CMake/Ninja, GCC, cabeceras X11/XInput2, xvfb/xauth, fakeroot y dpkg. `linux/scripts/build.sh` prepara dependencias/modelo verificado, compila el motor y todos los módulos Java, ejecuta suites originales y regresiones, crea el runtime portable y comprueba ese ejecutable antes de generar TAR y DEB. `--dependencies-only` prepara solo dependencias y recursos.
+JDK 17 completo, Python 3.12 con Pillow 12, Maven, CMake/Ninja, GCC, cabeceras X11/XInput2, xvfb/xauth, fakeroot y dpkg. `linux/scripts/build.sh` prepara dependencias/modelo verificado, compila el motor y todos los módulos Java, ejecuta las 23 suites C++ originales con aserciones activadas y las suites Java/regresiones, crea el runtime portable y comprueba ese ejecutable antes de generar TAR y DEB. `--dependencies-only` prepara solo dependencias y recursos.
 
 CI compila en Ubuntu 22.04 y vuelve a ejecutar el paquete extraído en Ubuntu 24.04. La publicación sucede únicamente después de ambas comprobaciones. Esto no equivale a una prueba física de cada GPU, escritorio o tableta.
