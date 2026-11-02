@@ -46,7 +46,15 @@ public final class DrawingProjectSetupTest {
         assertTrue(dialog[0].isShowing());assertEquals(64,editor.readDrawing().documentWidth());
         presets[0].setSelection(2);
       });
-      instrumentation.waitForIdleSync();
+      // Spinner selection is delivered on a later layout frame, after the main queue is idle.
+      java.util.concurrent.atomic.AtomicBoolean selected=new java.util.concurrent.atomic.AtomicBoolean();
+      long deadline=android.os.SystemClock.uptimeMillis()+5000;
+      do{
+        instrumentation.waitForIdleSync();
+        instrumentation.runOnMainSync(()->selected.set("1280".contentEquals(width[0].getText())&&"720".contentEquals(height[0].getText())));
+        if(!selected.get())android.os.SystemClock.sleep(50);
+      }while(!selected.get()&&android.os.SystemClock.uptimeMillis()<deadline);
+      assertTrue("Preset selection must update both dimension fields",selected.get());
       instrumentation.runOnMainSync(()->{
         assertEquals("1280",width[0].getText().toString());assertEquals("720",height[0].getText().toString());
         linked[0].setChecked(true);width[0].setText("640");assertEquals("360",height[0].getText().toString());
