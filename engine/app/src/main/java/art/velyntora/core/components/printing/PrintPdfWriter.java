@@ -10,7 +10,8 @@ import java.io.*;
 public final class PrintPdfWriter {
   public static void write(Context context,PrintSnapshot snapshot,PrintAttributes attributes,OutputStream destination,CancellationSignal cancellation)throws IOException{
     cancellation.throwIfCanceled();
-    try(PrintedPdfDocument pdf=new PrintedPdfDocument(context,attributes)){
+    PrintedPdfDocument pdf=new PrintedPdfDocument(context,attributes);
+    try{
       BitmapRegionDecoder decoder=BitmapRegionDecoder.newInstance(snapshot.file.toString(),false);
       if(decoder==null)throw new IOException("No se pudo leer la copia de impresión");
       PdfDocument.Page page=null;
@@ -38,7 +39,7 @@ public final class PrintPdfWriter {
         };
         pdf.writeTo(checked);checked.flush();cancellation.throwIfCanceled();
       }finally{if(page!=null)pdf.finishPage(page);decoder.recycle();}
-    }
+    }finally{pdf.close();}
   }
   private PrintPdfWriter(){}
 }
