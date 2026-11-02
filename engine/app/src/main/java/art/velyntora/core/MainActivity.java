@@ -23,6 +23,8 @@ import java.io.OutputStream;
 
 /** Android workspace modeled after Pinta's tool, canvas, palette and status regions. */
 public final class MainActivity extends Activity {
+  private final SaveMenu saveMenu = new SaveMenu(this);
+  private final PdfExport pdfExport = new PdfExport(this);
   private final DocumentPrinting documentPrinting = new DocumentPrinting(this);
   private final DocumentSession documentSession = new DocumentSession(this);
   private final StatusBar statusBar = new StatusBar(this);
@@ -286,6 +288,10 @@ public final class MainActivity extends Activity {
     if (focus) EditorEntry.immersive(getWindow());
   }
 
+  android.app.AlertDialog openSaveMenu(){return saveMenu.show();}
+
+  void savePdf(){pdfExport.chooseDestination();}
+
   void printDocument(){documentPrinting.start();}
 
   void menuWithIcon(LinearLayout parent,String title,String[] labels,Runnable[] actions,String iconLabel,android.graphics.drawable.Drawable icon){
@@ -386,6 +392,7 @@ public final class MainActivity extends Activity {
 
   @Override
   protected void onDestroy() {
+    pdfExport.close();
     documentPrinting.close();
     if(drawing!=null)drawing.placedImage().dispose();
     if (projectProgress != null) {
@@ -558,6 +565,7 @@ public final class MainActivity extends Activity {
     super.onActivityResult(request, result, data);
     if (result != RESULT_OK || data == null || data.getData() == null) return;
     Uri uri = data.getData();
+    if(request==PdfExport.SAVE_PDF){pdfExport.export(uri);return;}
     if (request == OPEN_ORA
         || request == OPEN_PROJECT
         || request == OPEN_TIFF

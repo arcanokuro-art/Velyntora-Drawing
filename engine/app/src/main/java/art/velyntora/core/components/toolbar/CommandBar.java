@@ -33,7 +33,7 @@ final class CommandBar {
     LinearLayout commands = host.row();
     host.iconButton(commands, "Nuevo", "new", () -> host.protectDocument(() -> host.configureDimensions(0)));
     host.iconButton(commands, "Abrir", "open", host::openImage);
-    host.iconButton(commands, "Guardar", "save", () -> host.projectPicker(true));
+    host.iconButton(commands, "Guardar", "save", host::openSaveMenu);
     host.iconButton(commands, "Deshacer", "undo", host::undo);
     host.iconButton(commands, "Rehacer", "redo", host::redo);
     HorizontalScrollView shortcuts = new HorizontalScrollView(host);

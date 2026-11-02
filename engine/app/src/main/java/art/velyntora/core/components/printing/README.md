@@ -1,6 +1,6 @@
 # Impresión Android
 
-Entrada: **☰ → Archivo → Imprimir…**. Atajo opcional con teclado: **Ctrl+P**.
+Entrada: **Flecha Guardar → Imprimir…**. Atajo opcional con teclado: **Ctrl+P**.
 
 - `DocumentPrinting`: prepara una copia temporal del documento y abre PrintManager.
 - `PrintSnapshot`: compone las capas visibles a PNG a resolución original, por bloques y con comprobación de revisión; limpia archivos incompletos al cancelar o fallar.
