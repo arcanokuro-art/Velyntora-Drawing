@@ -15,6 +15,12 @@ public final class EditorIntegrationTest {
     private final Instrumentation instrumentation=InstrumentationRegistry.getInstrumentation();
     private MainActivity home(){return (MainActivity)instrumentation.startActivitySync(new Intent(instrumentation.getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}
     private View find(View view,Class<?> type){if(type.isInstance(view))return view;if(view instanceof ViewGroup){ViewGroup g=(ViewGroup)view;for(int i=0;i<g.getChildCount();i++){View found=find(g.getChildAt(i),type);if(found!=null)return found;}}return null;}
+    private void systemBack(){
+        android.app.UiAutomation automation=instrumentation.getUiAutomation();
+        long now=SystemClock.uptimeMillis();
+        assertTrue(automation.injectInputEvent(new KeyEvent(now,now,KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_BACK,0),true));
+        assertTrue(automation.injectInputEvent(new KeyEvent(now,SystemClock.uptimeMillis(),KeyEvent.ACTION_UP,KeyEvent.KEYCODE_BACK,0),true));
+    }
     @Test public void homeCreateOpensNativeEditorAndDimensions(){
         MainActivity home=home();
         Instrumentation.ActivityMonitor monitor=instrumentation.addMonitor("art.velyntora.core.MainActivity",null,false);
@@ -31,11 +37,11 @@ public final class EditorIntegrationTest {
         });
         // The new-canvas dialog is the only focusable window with dimension inputs.
         assertTrue("Dimension dialog must own window focus",editor.hasWindowFocus()==false);
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+        systemBack();
         instrumentation.runOnMainSync(()->{editor.finish();home.finish();});
         instrumentation.removeMonitor(monitor);
     }
-    @Test public void imageUriIsImportedByCore(){
+    @Test public void imageUriIsImportedByCoreAndOpensAndroidPrintPanel(){
         Context context=instrumentation.getTargetContext();
         ContentValues values=new ContentValues();values.put(MediaStore.Images.Media.DISPLAY_NAME,"drawing-integration.png");values.put(MediaStore.Images.Media.MIME_TYPE,"image/png");
         Uri uri=context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values);assertNotNull(uri);
@@ -49,6 +55,20 @@ public final class EditorIntegrationTest {
             long deadline=SystemClock.uptimeMillis()+15000;
             do{instrumentation.waitForIdleSync();instrumentation.runOnMainSync(()->{art.velyntora.core.DrawingView canvas=(art.velyntora.core.DrawingView)find(opened.getWindow().getDecorView(),art.velyntora.core.DrawingView.class);imported.set(canvas!=null&&canvas.documentWidth()==79&&canvas.documentHeight()==53);});if(!imported.get())SystemClock.sleep(50);}while(!imported.get()&&SystemClock.uptimeMillis()<deadline);
             assertTrue("Core must import the passed URI at its original dimensions",imported.get());
+            // Dispatch the actual keyboard command, then inspect the system print activity.
+            instrumentation.runOnMainSync(()->opened.onKeyDown(KeyEvent.KEYCODE_P,new KeyEvent(0,0,KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_P,0,KeyEvent.META_CTRL_ON)));
+            boolean printing=false;deadline=SystemClock.uptimeMillis()+15000;
+            do{
+                android.view.accessibility.AccessibilityNodeInfo root=instrumentation.getUiAutomation().getRootInActiveWindow();
+                if(root!=null){printing="com.android.printspooler".contentEquals(root.getPackageName()==null?"":root.getPackageName());root.recycle();}
+                if(!printing)SystemClock.sleep(100);
+            }while(!printing&&SystemClock.uptimeMillis()<deadline);
+            assertTrue("Print command must open Android's system print panel",printing);
+            systemBack();
+            java.io.File snapshots=new java.io.File(context.getCacheDir(),"printing");
+            deadline=SystemClock.uptimeMillis()+10000;
+            while(snapshots.list()!=null&&snapshots.list().length>0&&SystemClock.uptimeMillis()<deadline)SystemClock.sleep(100);
+            assertTrue("Cancelled print must delete its snapshot",snapshots.list()==null||snapshots.list().length==0);
         }finally{if(editor!=null){final Activity finish=editor;instrumentation.runOnMainSync(finish::finish);}context.getContentResolver().delete(uri,null,null);}
     }
 }
