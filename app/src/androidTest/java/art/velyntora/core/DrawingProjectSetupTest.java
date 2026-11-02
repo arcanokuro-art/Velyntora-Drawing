@@ -21,13 +21,14 @@ public final class DrawingProjectSetupTest {
     return null;
   }
   @Test public void presetsMatchReferenceAndRespectCanvasBudget(){
-    DrawingPresets.Preset[] presets=DrawingPresets.all();assertEquals(7,presets.length);
-    int[][] reference={{1920,1080},{1280,720},{1080,1920},{720,1280},{1700,2400},{4299,6071},{4960,7016}};
+    DrawingPresets.Preset[] presets=DrawingPresets.all();assertEquals(8,presets.length);
+    assertEquals("Doujinshi",presets[5].name);assertEquals("Manga",presets[6].name);assertEquals("Manhwa",presets[7].name);
+    int[][] reference={{1920,1080},{1280,720},{1080,1920},{720,1280},{1700,2400},{2500,3600},{3072,4096},{2400,3840}};
     for(int i=0;i<presets.length;i++){
       DrawingPresets.Preset preset=presets[i];assertEquals(reference[i][0],preset.width);assertEquals(reference[i][1],preset.height);
-      assertEquals(i<5,preset.supported());int[] size=preset.compatibleSize();
+      assertTrue(preset.supported());int[] size=preset.compatibleSize();
       assertTrue(art.velyntora.core.document.CanvasLimits.accepts(size[0],size[1]));
-      if(i<5)assertArrayEquals(reference[i],size);else{assertEquals(6000,size[1]);assertEquals((double)preset.width/preset.height,(double)size[0]/size[1],0.0001);}
+      assertArrayEquals(reference[i],size);
     }
   }
   @Test public void linkedDimensionsPresetValidationCreateAndCancel(){
@@ -39,7 +40,7 @@ public final class DrawingProjectSetupTest {
         dialog[0]=new DrawingProjectSetup(editor).show();View root=dialog[0].getWindow().getDecorView();
         width[0]=(EditText)find(root,"Ancho en píxeles");height[0]=(EditText)find(root,"Alto en píxeles");
         presets[0]=(Spinner)find(root,"Presets de dibujo");linked[0]=checkbox(root);
-        assertNotNull(width[0]);assertNotNull(height[0]);assertNotNull(linked[0]);assertEquals(8,presets[0].getCount());
+        assertNotNull(width[0]);assertNotNull(height[0]);assertNotNull(linked[0]);assertEquals(9,presets[0].getCount());
       });
       java.util.concurrent.atomic.AtomicBoolean laidOut=new java.util.concurrent.atomic.AtomicBoolean();
       long layoutDeadline=android.os.SystemClock.uptimeMillis()+5000;
