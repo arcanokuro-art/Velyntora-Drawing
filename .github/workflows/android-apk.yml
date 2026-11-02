@@ -13,7 +13,7 @@ permissions:
   contents: write
 concurrency:
   group: drawing-pilot-build
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -41,12 +41,14 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 7
         with:
           api-level: 29
           arch: x86_64
           profile: pixel_2
           disable-animations: true
-          script: gradle :app:connectedDebugAndroidTest --stacktrace
+          emulator-boot-timeout: 120
+          script: bash scripts/check_android.sh
       - name: Informes de pruebas Android
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,6 +57,7 @@ jobs:
           path: |
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
+            build/android-diagnostics/
       - run: cp app/build/outputs/apk/debug/app-debug.apk Velyntora-Drawing-pilot.apk
       - uses: actions/upload-artifact@v4
         with:
