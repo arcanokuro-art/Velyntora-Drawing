@@ -69,6 +69,7 @@ final class DocumentDimensionsDialog {
   }
 
   void configureDimensions(int mode) {
+    if(mode==0){new DrawingProjectSetup(host).show();return;}
     LinearLayout form = new LinearLayout(host);
     form.setOrientation(LinearLayout.VERTICAL);
     android.widget.EditText width = new android.widget.EditText(host),
@@ -172,48 +173,6 @@ final class DocumentDimensionsDialog {
             } catch (IllegalArgumentException ignored) {
             }
         });
-    if (mode == 0) {
-      android.widget.Spinner presets = new android.widget.Spinner(host);
-      presets.setContentDescription("Tamaños rápidos de documento");
-      presets.setAdapter(
-          new android.widget.ArrayAdapter<String>(
-              host,
-              android.R.layout.simple_spinner_dropdown_item,
-              new String[] {
-                "Personalizado",
-                "Cuadrado · 512 × 512",
-                "Cuadrado · 1024 × 1024",
-                "Horizontal · 1920 × 1080",
-                "Vertical · 1080 × 1920",
-                "Panorama · 2400 × 1000",
-                "Horizontal · 2560 × 1600",
-                "4K · 3840 × 2160"
-              }));
-      final int[][] sizes = {
-        {originalWidth, originalHeight},
-        {512, 512},
-        {1024, 1024},
-        {1920, 1080},
-        {1080, 1920},
-        {2400, 1000},
-        {2560, 1600},
-        {3840, 2160}
-      };
-      presets.setOnItemSelectedListener(
-          new android.widget.AdapterView.OnItemSelectedListener() {
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
-
-            public void onItemSelected(
-                android.widget.AdapterView<?> parent, View view, int position, long id) {
-              if (position > 0) {
-                width.setText(Integer.toString(sizes[position][0]));
-                height.setText(Integer.toString(sizes[position][1]));
-              }
-            }
-          });
-      form.addView(host.text("Tamaños rápidos"));
-      form.addView(presets);
-    }
     android.widget.Spinner method = new android.widget.Spinner(host),
         anchor = new android.widget.Spinner(host);
     method.setAdapter(
@@ -262,7 +221,7 @@ final class DocumentDimensionsDialog {
     AlertDialog dialog =
         new AlertDialog.Builder(host)
             .setTitle(
-                mode == 0 ? "Nuevo documento" : mode == 1 ? "Tamaño de imagen" : "Tamaño de lienzo")
+                mode == 1 ? "Tamaño de imagen" : "Tamaño de lienzo")
             .setView(host.scrollForm(form))
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Aplicar", null)
@@ -303,22 +262,13 @@ final class DocumentDimensionsDialog {
                           host.message("Espera a que termine la operación actual");
                           return;
                         }
-                        if (mode == 0) {
-                          if (!host.readDrawing().newDocument(w, h)) {
-                            host.message("No se pudo crear el documento");
-                            return;
-                          }
-                          host.markDocumentClean("Sin título");
-                          dialog.dismiss();
-                        } else {
-                          dialog.dismiss();
-                          host.resizeDocumentAsync(
-                              w,
-                              h,
-                              mode == 1,
-                              method.getSelectedItemPosition() == 1,
-                              anchor.getSelectedItemPosition());
-                        }
+                        dialog.dismiss();
+                        host.resizeDocumentAsync(
+                            w,
+                            h,
+                            mode == 1,
+                            method.getSelectedItemPosition() == 1,
+                            anchor.getSelectedItemPosition());
                       } catch (IllegalArgumentException e) {
                         host.message(
                             e instanceof NumberFormatException

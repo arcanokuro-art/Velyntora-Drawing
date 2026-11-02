@@ -10,4 +10,6 @@ Validación: comprobación de límites modular, compilación Android y suite de 
 
 ## Presupuesto unificado
 
-CanvasLimits.java y core/include/velyntora/CanvasLimits.hpp fijan 8192 px por lado y 16 millones de píxeles por documento. Creación, redimensionado, decodificación, proyectos e imágenes exportadas comparten el presupuesto; se conserva el límite total de 24 millones de píxeles entre las capas. Los presets incluyen 2560 × 1600 y 4K. La pantalla se actualiza en franjas de hasta 262144 píxeles para reducir memoria temporal.
+CanvasLimits.java y core/include/velyntora/CanvasLimits.hpp fijan 6000 px por lado y 36 millones de píxeles por documento. Creación, redimensionado, decodificación, proyectos e imágenes exportadas comparten el presupuesto. La pantalla se actualiza en franjas de hasta 262144 píxeles para reducir memoria temporal.
+
+Crear ilustración (`configureDimensions(0)`) se delega a `components/project_setup`, que contiene los presets de dibujo y el vínculo de proporción. Aquí permanecen Tamaño de imagen y Tamaño de lienzo para documentos existentes.
