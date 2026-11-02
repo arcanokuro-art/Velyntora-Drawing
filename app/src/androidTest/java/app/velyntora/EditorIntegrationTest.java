@@ -64,10 +64,22 @@ public final class EditorIntegrationTest {
                 if(!printing)SystemClock.sleep(100);
             }while(!printing&&SystemClock.uptimeMillis()<deadline);
             assertTrue("Print command must open Android's system print panel",printing);
+            try{instrumentation.getUiAutomation().waitForIdle(300,5000);}catch(java.util.concurrent.TimeoutException ignored){}
             systemBack();
             java.io.File snapshots=new java.io.File(context.getCacheDir(),"printing");
             deadline=SystemClock.uptimeMillis()+10000;
-            while(snapshots.list()!=null&&snapshots.list().length>0&&SystemClock.uptimeMillis()<deadline)SystemClock.sleep(100);
+            long nextBack=SystemClock.uptimeMillis()+1500;
+            while(snapshots.list()!=null&&snapshots.list().length>0&&SystemClock.uptimeMillis()<deadline){
+                // A first Back may only dismiss the print UI keyboard or arrive during its opening transition.
+                if(SystemClock.uptimeMillis()>=nextBack){
+                    android.view.accessibility.AccessibilityNodeInfo root=instrumentation.getUiAutomation().getRootInActiveWindow();
+                    boolean printStillOpen=root!=null&&"com.android.printspooler".contentEquals(root.getPackageName()==null?"":root.getPackageName());
+                    if(root!=null)root.recycle();
+                    if(printStillOpen)systemBack();
+                    nextBack=SystemClock.uptimeMillis()+1500;
+                }
+                SystemClock.sleep(100);
+            }
             assertTrue("Cancelled print must delete its snapshot",snapshots.list()==null||snapshots.list().length==0);
         }finally{if(editor!=null){final Activity finish=editor;instrumentation.runOnMainSync(finish::finish);}context.getContentResolver().delete(uri,null,null);}
     }
