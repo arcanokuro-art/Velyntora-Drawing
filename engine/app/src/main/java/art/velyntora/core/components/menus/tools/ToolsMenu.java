@@ -27,31 +27,24 @@ final class ToolsMenu {
  private final MainActivity host;
  ToolsMenu(MainActivity host) {this.host=host;}
 
-  void populate(LinearLayout menus) {
-    host.menu(
-        menus,
-        "Herramientas",
-        new String[] {
-          "Configurar pincel",
-          "Elegir color…",
-          "Color secundario…",
-          "Intercambiar colores",
-          "Configurar degradado…",
-          "Confirmar Línea/Curva",
-          "Cancelar Línea/Curva"
-        },
-        new Runnable[] {
-          host::configureBrush,
-          host::configureColor,
-          () -> host.configureColor(true),
-          () -> {
-            int first = host.readActiveColor();
-            host.setActiveColor(host.readSecondaryColor());
-            host.setSecondaryColor(first);
-          },
-          host::configureGradient,
-          host.readDrawing()::confirmCurve,
-          host.readDrawing()::cancelCurve
-        });
+  void populate(LinearLayout menus){host.button(menus,"Herramientas",this::show);}
+
+  AlertDialog show(){
+    java.util.ArrayList<String> labels=new java.util.ArrayList<>();
+    java.util.ArrayList<Runnable> actions=new java.util.ArrayList<>();
+    if(BrushSettingsPolicy.available(host.readDrawing().currentTool())){
+      labels.add("Configurar pincel");actions.add(host::configureBrush);
+    }
+    labels.add("Elegir color…");actions.add(host::configureColor);
+    labels.add("Color secundario…");actions.add(()->host.configureColor(true));
+    labels.add("Intercambiar colores");actions.add(()->{
+      int first=host.readActiveColor();host.setActiveColor(host.readSecondaryColor());host.setSecondaryColor(first);
+    });
+    labels.add("Configurar degradado…");actions.add(host::configureGradient);
+    labels.add("Confirmar Línea/Curva");actions.add(host.readDrawing()::confirmCurve);
+    labels.add("Cancelar Línea/Curva");actions.add(host.readDrawing()::cancelCurve);
+    return new AlertDialog.Builder(host).setTitle("Herramientas").setItems(labels.toArray(new String[0]),(dialog,index)->{
+      if(host.readProjectProgress()==null)actions.get(index).run();
+    }).show();
   }
 }

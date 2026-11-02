@@ -30,6 +30,20 @@ final class ToolControls {
   private TextView sizeLabel;
   private SeekBar sizeSlider;
   private boolean syncingSize;
+  private LinearLayout brushSettingsParent;
+  private Button brushSettingsButton;
+  private int brushSettingsIndex;
+
+  private void syncBrushSettingsControl(){
+    if(brushSettingsParent==null)return;
+    if(!BrushSettingsPolicy.available(host.readDrawing().currentTool())){
+      if(brushSettingsButton!=null){brushSettingsParent.removeView(brushSettingsButton);brushSettingsButton=null;}
+    }else if(brushSettingsButton==null){
+      brushSettingsButton=host.iconButton(brushSettingsParent,"Configurar pincel","settings",host::configureBrush);
+      brushSettingsParent.removeView(brushSettingsButton);
+      brushSettingsParent.addView(brushSettingsButton,Math.min(brushSettingsIndex,brushSettingsParent.getChildCount()));
+    }
+  }
 
   private void syncSizeControl() {
     if (sizeSlider == null) return;
@@ -160,6 +174,7 @@ final class ToolControls {
     if (active == DrawingView.BRUSH && host.readSelectedTool() != null)
       host.readSelectedTool().setText(host.readDrawing().brushes().label());
     syncSizeControl();
+    syncBrushSettingsControl();
     if (host.readGradientOptions() != null)
       host.readGradientOptions().setVisibility(active == DrawingView.GRADIENT ? View.VISIBLE : View.GONE);
     if (host.readCurveConfirm() != null)
@@ -170,6 +185,7 @@ final class ToolControls {
   }
 
   void configureBrush() {
+    if(!BrushSettingsPolicy.available(host.readDrawing().currentTool()))return;
     LinearLayout form = new LinearLayout(host);
     form.setOrientation(LinearLayout.VERTICAL);
     SeekBar opacity = new SeekBar(host), hardness = new SeekBar(host);
@@ -322,7 +338,8 @@ final class ToolControls {
     syncSizeControl();
     options.addView(brushSize, new LinearLayout.LayoutParams(host.dp(120), host.dp(48)));
     OpacityControls.attach(host, host.readDrawing(), options);
-    host.iconButton(options, "Configurar pincel", "settings", host::configureBrush);
+    brushSettingsParent=options;brushSettingsIndex=options.getChildCount();
+    syncBrushSettingsControl();
     host.writeGradientOptions(host.iconButton(options, "Configurar degradado", "gradient", host::configureGradient));
     host.writeCurveConfirm(host.iconButton(options, "Confirmar Línea/Curva", "confirm", host.readDrawing()::confirmCurve));
     host.writeCurveCancel(host.iconButton(options, "Cancelar Línea/Curva", "cancel", host.readDrawing()::cancelCurve));
