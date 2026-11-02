@@ -23,6 +23,7 @@ import java.io.OutputStream;
 
 /** Android workspace modeled after Pinta's tool, canvas, palette and status regions. */
 public final class MainActivity extends Activity {
+  private final DocumentPrinting documentPrinting = new DocumentPrinting(this);
   private final DocumentSession documentSession = new DocumentSession(this);
   private final StatusBar statusBar = new StatusBar(this);
   private final SelectionActions selectionActions = new SelectionActions(this);
@@ -123,6 +124,9 @@ public final class MainActivity extends Activity {
           return true;
         case android.view.KeyEvent.KEYCODE_Y:
           redo();
+          return true;
+        case android.view.KeyEvent.KEYCODE_P:
+          printDocument();
           return true;
         case android.view.KeyEvent.KEYCODE_S:
           projectPicker(true);
@@ -282,6 +286,12 @@ public final class MainActivity extends Activity {
     if (focus) EditorEntry.immersive(getWindow());
   }
 
+  void printDocument(){documentPrinting.start();}
+
+  void menuWithIcon(LinearLayout parent,String title,String[] labels,Runnable[] actions,String iconLabel,android.graphics.drawable.Drawable icon){
+    workspaceMenus.menuWithIcon(parent,title,labels,actions,iconLabel,icon);
+  }
+
   void configureColor() {
     colorPanel.configureColor();
   }
@@ -376,6 +386,7 @@ public final class MainActivity extends Activity {
 
   @Override
   protected void onDestroy() {
+    documentPrinting.close();
     if(drawing!=null)drawing.placedImage().dispose();
     if (projectProgress != null) {
       projectProgress.dismiss();

@@ -28,7 +28,7 @@ final class FileMenu {
  FileMenu(MainActivity host) {this.host=host;}
 
   void populate(LinearLayout menus) {
-    host.menu(
+    host.menuWithIcon(
         menus,
         "Archivo",
         new String[] {
@@ -51,7 +51,8 @@ final class FileMenu {
           "Guardar ICO (hasta 256 px)",
           "Guardar PPM",
           "Abrir proyecto",
-          "Guardar proyecto"
+          "Guardar proyecto",
+          "Imprimir…"
         },
         new Runnable[] {
           () -> host.protectDocument(() -> host.configureDimensions(0)),
@@ -76,7 +77,8 @@ final class FileMenu {
           () -> host.saveImage("image/vnd.microsoft.icon", "dibujo.ico", host.readSAVE_ICO()),
           () -> host.saveImage("image/x-portable-pixmap", "dibujo.ppm", host.readSAVE_PPM()),
           () -> host.projectPicker(false),
-          () -> host.projectPicker(true)
-        });
+          () -> host.projectPicker(true),
+          host::printDocument
+        }, "Imprimir…", PrintIcon.load(host));
   }
 }

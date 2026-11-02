@@ -42,3 +42,6 @@ tasks.register('prepareRemoveAiModel') {
  }
 }
 tasks.named('preBuild').configure { dependsOn 'prepareRemoveAiModel' }
+
+// Printing is a self-contained component: its original icon lives alongside its code.
+android.sourceSets.main.assets.srcDirs += [file('src/main/java/art/velyntora/core/components/printing/assets')]

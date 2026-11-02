@@ -52,6 +52,13 @@ final class WorkspaceMenus {
                 .show());
   }
 
+  void menuWithIcon(LinearLayout parent,String title,String[] labels,Runnable[] actions,String iconLabel,android.graphics.drawable.Drawable icon){
+    host.button(parent,title,()->new AlertDialog.Builder(host).setTitle(title)
+        .setAdapter(new MenuIconAdapter(host,labels,iconLabel,icon),(dialog,index)->{
+          if(host.readProjectProgress()==null)actions[index].run();
+        }).show());
+  }
+
   void createRegistry() {
     LinearLayout menus = host.row();
     new FileMenu(host).populate(menus);
