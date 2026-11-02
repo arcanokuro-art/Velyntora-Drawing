@@ -40,6 +40,16 @@ public final class DrawingProjectSetupTest {
         width[0]=(EditText)find(root,"Ancho en píxeles");height[0]=(EditText)find(root,"Alto en píxeles");
         presets[0]=(Spinner)find(root,"Presets de dibujo");linked[0]=checkbox(root);
         assertNotNull(width[0]);assertNotNull(height[0]);assertNotNull(linked[0]);assertEquals(8,presets[0].getCount());
+      });
+      java.util.concurrent.atomic.AtomicBoolean laidOut=new java.util.concurrent.atomic.AtomicBoolean();
+      long layoutDeadline=android.os.SystemClock.uptimeMillis()+5000;
+      do{
+        instrumentation.waitForIdleSync();
+        instrumentation.runOnMainSync(()->laidOut.set(presets[0].isLaidOut()&&presets[0].getSelectedItemPosition()==0));
+        if(!laidOut.get())android.os.SystemClock.sleep(50);
+      }while(!laidOut.get()&&android.os.SystemClock.uptimeMillis()<layoutDeadline);
+      assertTrue("Setup must complete its first layout before user interaction",laidOut.get());
+      instrumentation.runOnMainSync(()->{
         linked[0].setChecked(true);width[0].setText("128");assertEquals("64",height[0].getText().toString());
         height[0].setText("96");assertEquals("192",width[0].getText().toString());
         linked[0].setChecked(false);width[0].setText("0");dialog[0].getButton(AlertDialog.BUTTON_POSITIVE).performClick();
@@ -54,7 +64,7 @@ public final class DrawingProjectSetupTest {
         instrumentation.runOnMainSync(()->selected.set("1280".contentEquals(width[0].getText())&&"720".contentEquals(height[0].getText())));
         if(!selected.get())android.os.SystemClock.sleep(50);
       }while(!selected.get()&&android.os.SystemClock.uptimeMillis()<deadline);
-      assertTrue("Preset selection must update both dimension fields",selected.get());
+      instrumentation.runOnMainSync(()->assertTrue("Preset must update dimensions; selection="+presets[0].getSelectedItemPosition()+", width="+width[0].getText()+", height="+height[0].getText(),selected.get()));
       instrumentation.runOnMainSync(()->{
         assertEquals("1280",width[0].getText().toString());assertEquals("720",height[0].getText().toString());
         linked[0].setChecked(true);width[0].setText("640");assertEquals("360",height[0].getText().toString());
