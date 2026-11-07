@@ -126,7 +126,13 @@ final class PlacedImageSession {
     }
     if(action==MotionEvent.ACTION_CANCEL){cancelGesture();return true;}
     if((action==MotionEvent.ACTION_MOVE || action==MotionEvent.ACTION_UP) && dragStart!=null){
-      if(handle==-1){state.cx=dragStart.cx+x-startX;state.cy=dragStart.cy+y-startY;guides.move(state,drawing.documentWidth(),drawing.documentHeight(),8*drawing.getResources().getDisplayMetrics().density/(float)drawing.readViewport().scale);}
+      if(handle==-1){
+        float dx=x-startX,dy=y-startY;
+        state.cx=dragStart.cx+dx;state.cy=dragStart.cy+dy;
+        if(Math.abs(dx)>0.01f || Math.abs(dy)>0.01f)
+          guides.move(state,drawing.documentWidth(),drawing.documentHeight(),8*drawing.getResources().getDisplayMetrics().density/(float)drawing.readViewport().scale);
+        else guides.clear();
+      }
       else if(handle==8){state.angle=dragStart.angle+(float)Math.toDegrees(Math.atan2(y-dragStart.cy,x-dragStart.cx))-startAngle;guides.rotate(state);}
       else if(handle>=0){
         int[] xs={-1,0,1,1,1,0,-1,-1},ys={-1,-1,-1,0,1,1,1,0};int hx=xs[handle],hy=ys[handle];
@@ -146,10 +152,13 @@ final class PlacedImageSession {
     }
     return true;
   }
-  void draw(Canvas canvas,float scale){
+  void drawContent(Canvas canvas){
     if(!active())return;Paint image=new Paint(Paint.FILTER_BITMAP_FLAG);image.setAlpha(Math.round(state.opacity*255));
     if(editor==null){canvas.save();canvas.concat(state.matrix());canvas.clipRect(state.crop);
     if(text!=null){canvas.saveLayerAlpha(state.crop,Math.round(state.opacity*255));new TextGlyphLayout(text).draw(canvas);canvas.restore();}else canvas.drawBitmap(source.preview,null,new RectF(0,0,source.size.displayWidth(),source.size.displayHeight()),image);canvas.restore();}
+  }
+  void drawOverlay(Canvas canvas,float scale){
+    if(!active())return;
     guides.draw(canvas,state,drawing.documentWidth(),drawing.documentHeight(),scale,drawing.getResources().getDisplayMetrics().density);
     float[] p=state.handles();Paint frame=new Paint(Paint.ANTI_ALIAS_FLAG);frame.setColor(0xFF80CBC4);frame.setStrokeWidth(1.5f/scale);frame.setStyle(Paint.Style.STROKE);
     Path border=new Path();border.moveTo(p[0],p[1]);for(int i:new int[]{2,4,6})border.lineTo(p[i*2],p[i*2+1]);border.close();canvas.drawPath(border,frame);
