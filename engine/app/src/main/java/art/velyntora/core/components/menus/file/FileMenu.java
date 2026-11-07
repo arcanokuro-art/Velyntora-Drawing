@@ -1,28 +1,21 @@
 package art.velyntora.core;
 
-import android.widget.LinearLayout;
 import android.app.AlertDialog;
+import android.widget.LinearLayout;
 
-/** File creation and opening; save/export destinations live in components/saving. */
 final class FileMenu {
   private final MainActivity host;
-  FileMenu(MainActivity host){this.host=host;}
-  void populate(LinearLayout menus){
-    host.button(menus,"Archivo",this::show);
+  FileMenu(MainActivity host) { this.host = host; }
+  void populate(LinearLayout menus) { host.button(menus, "Archivo", this::show); }
+  AlertDialog show() {
+    return MenuChoices.show(host, "Archivo", new String[]{
+      "Insertar imagen como capa…", "Abrir en formato específico…"
+    }, () -> host.readDrawing().placedImage().pick(), this::openFormats);
   }
-  AlertDialog show(){
-    String[] labels={
-      "Nuevo…","Abrir archivo (detección automática)","Insertar imagen como capa…",
-      "Abrir TGA","Abrir TIFF","Abrir ICO","Abrir Netpbm (PBM/PGM/PPM)",
-      "Abrir OpenRaster","Abrir proyecto"
-    };
-    Runnable[] actions={
-      ()->host.protectDocument(()->host.configureDimensions(0)),host::openImage,
-      ()->host.readDrawing().placedImage().pick(),host::openTga,host::openTiff,host::openIco,host::openPpm,
-      ()->host.openRasterPicker(false),()->host.projectPicker(false)
-    };
-    return new AlertDialog.Builder(host).setTitle("Archivo").setItems(labels,(dialog,index)->{
-      if(host.readProjectProgress()==null)actions[index].run();
-    }).show();
+  AlertDialog openFormats() {
+    return MenuChoices.show(host, "Abrir en formato específico", new String[]{
+      "TGA", "TIFF", "ICO", "Netpbm (PBM/PGM/PPM)", "OpenRaster (.ora)", "Proyecto Velyntora (.vlycore)"
+    }, host::openTga, host::openTiff, host::openIco, host::openPpm,
+      () -> host.openRasterPicker(false), () -> host.projectPicker(false));
   }
 }

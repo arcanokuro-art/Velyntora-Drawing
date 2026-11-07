@@ -48,8 +48,18 @@ public final class SaveMenuDeviceTest {
       instrumentation.waitForIdleSync();assertEquals("Guardar PDF must open the application/pdf file picker directly",1,picker.getHits());
       instrumentation.runOnMainSync(()->{
         assertNull("Cancelling the picker must not start an export",editor.readProjectProgress());
-        dialog[0]=new FileMenu(editor).show();ListAdapter adapter=dialog[0].getListView().getAdapter();assertEquals(9,adapter.getCount());
-        for(int i=0;i<adapter.getCount();i++){String label=adapter.getItem(i).toString();assertFalse(label.contains("Guardar"));assertFalse(label.contains("Imprimir"));}
+        String[] sections={"Archivo","Editar y selección","Lienzo e imagen","Color","Efectos","Ver","Ayuda"};
+        android.widget.LinearLayout registry=editor.readMenuRegistry();
+        assertEquals(sections.length,registry.getChildCount());
+        for(int i=0;i<sections.length;i++)assertEquals(sections[i],((android.widget.Button)registry.getChildAt(i)).getText().toString());
+        dialog[0]=new FileMenu(editor).show();ListAdapter adapter=dialog[0].getListView().getAdapter();assertEquals(2,adapter.getCount());
+        assertEquals("Insertar imagen como capa…",adapter.getItem(0));
+        assertEquals("Abrir en formato específico…",adapter.getItem(1));
+        dialog[0].dismiss();
+        dialog[0]=new FileMenu(editor).openFormats();
+        ListAdapter formats=dialog[0].getListView().getAdapter();
+        assertEquals(6,formats.getCount());
+        assertEquals("Proyecto Velyntora (.vlycore)",formats.getItem(5));
       });
     }finally{instrumentation.removeMonitor(picker);instrumentation.runOnMainSync(()->{if(dialog[0]!=null)dialog[0].dismiss();editor.finish();});}
   }
