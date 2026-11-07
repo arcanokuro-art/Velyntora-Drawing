@@ -8,9 +8,9 @@ android {
         applicationId 'app.velyntora.drawing'
         minSdk 26
         targetSdk 35
-        versionCode 9
+        versionCode 10
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        versionName '0.2.7-pilot'
+        versionName '0.2.8-pilot'
     }
 }
 

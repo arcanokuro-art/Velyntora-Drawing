@@ -135,13 +135,9 @@ final class PlacedImageSession {
       }
       else if(handle==8){state.angle=dragStart.angle+(float)Math.toDegrees(Math.atan2(y-dragStart.cy,x-dragStart.cx))-startAngle;guides.rotate(state);}
       else if(handle>=0){
-        int[] xs={-1,0,1,1,1,0,-1,-1},ys={-1,-1,-1,0,1,1,1,0};int hx=xs[handle],hy=ys[handle];
-        double angle=Math.toRadians(dragStart.angle),c=Math.cos(angle),s=Math.sin(angle);
-        float dx=(float)((x-startX)*c+(y-startY)*s),dy=(float)(-(x-startX)*s+(y-startY)*c);
-        float w=hx==0?dragStart.width:Math.max(1,dragStart.width+hx*dx),h=hy==0?dragStart.height:Math.max(1,dragStart.height+hy*dy);
-        if(keepRatio){float factor=hx==0?h/dragStart.height:hy==0?w/dragStart.width:(Math.abs(w/dragStart.width-1)>=Math.abs(h/dragStart.height-1)?w/dragStart.width:h/dragStart.height);w=dragStart.width*factor;h=dragStart.height*factor;}
-        w=Math.min(24000,w);h=Math.min(24000,h);float shiftX=hx*(w-dragStart.width)/2,shiftY=hy*(h-dragStart.height)/2;
-        state.cx=dragStart.cx+(float)(shiftX*c-shiftY*s);state.cy=dragStart.cy+(float)(shiftX*s+shiftY*c);state.width=w;state.height=h;
+        PlacedImageResize.apply(dragStart,state,handle,x-startX,y-startY,keepRatio,
+          drawing.documentWidth(),drawing.documentHeight(),
+          8*drawing.getResources().getDisplayMetrics().density/(float)drawing.readViewport().scale,guides);
       }
       if(editor!=null)editor.request();drawing.invalidate();
       if(action==MotionEvent.ACTION_UP){
