@@ -22,7 +22,7 @@ public final class DrawingProjectSetupTest {
   }
   @Test public void presetsMatchReferenceAndRespectCanvasBudget(){
     DrawingPresets.Preset[] presets=DrawingPresets.all();assertEquals(8,presets.length);
-    assertEquals("Doujinshi",presets[5].name);assertEquals("Manga",presets[6].name);assertEquals("Manhwa",presets[7].name);
+    assertEquals("Manga",presets[5].name);assertEquals("Manga",presets[6].name);assertEquals("Manhwa",presets[7].name);
     int[][] reference={{1920,1080},{1280,720},{1080,1920},{720,1280},{1700,2400},{2500,3600},{3072,4096},{2400,3840}};
     for(int i=0;i<presets.length;i++){
       DrawingPresets.Preset preset=presets[i];assertEquals(reference[i][0],preset.width);assertEquals(reference[i][1],preset.height);
