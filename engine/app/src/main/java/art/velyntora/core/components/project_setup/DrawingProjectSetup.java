@@ -112,7 +112,8 @@ public final class DrawingProjectSetup {
     AlertDialog dialog=new AlertDialog.Builder(host).setTitle("Crear ilustración")
       .setView(scroll).setNegativeButton("Cancelar",null)
       .setPositiveButton("Crear ilustración",null).create();
-    dialog.setOnShowListener(ignored->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view->{
+    dialog.show();
+    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view->{
       if(editor!=null&&editor.readProjectProgress()!=null){message("Espera a que termine la operación actual");return;}
       try{
         DocumentDimensions size=dimensions();
@@ -122,7 +123,7 @@ public final class DrawingProjectSetup {
         String message=error instanceof NumberFormatException?"Introduce ancho y alto válidos en píxeles":error.getMessage();
         (lastEdited==0?width:height).setError(message);message(message);
       }
-    }));
-    dialog.show();return dialog;
+    });
+    return dialog;
   }
 }

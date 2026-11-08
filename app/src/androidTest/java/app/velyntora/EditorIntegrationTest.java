@@ -24,20 +24,29 @@ public final class EditorIntegrationTest {
     @Test public void homeCreateOpensNativeEditorAndDimensions(){
         MainActivity home=home();
         Instrumentation.ActivityMonitor monitor=instrumentation.addMonitor("art.velyntora.core.MainActivity",null,false);
-        instrumentation.runOnMainSync(home::createIllustration);
+        instrumentation.runOnMainSync(()->{
+            AlertDialog canceled=home.showCreateDialog();
+            canceled.getButton(AlertDialog.BUTTON_NEGATIVE).performClick();
+            assertEquals(0,monitor.getHits());
+            AlertDialog dialog=home.showCreateDialog();
+            View form=dialog.getWindow().getDecorView();
+            ((EditText)find(form,EditText.class)).setText("320");
+            assertEquals(0,monitor.getHits());
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+        });
         Activity editor=instrumentation.waitForMonitorWithTimeout(monitor,10000);
         assertNotNull("Create must launch Core editor",editor);
         instrumentation.waitForIdleSync();
         instrumentation.runOnMainSync(()->{
-            assertNotNull(find(editor.getWindow().getDecorView(),art.velyntora.core.DrawingView.class));
+            art.velyntora.core.DrawingView canvas=(art.velyntora.core.DrawingView)find(editor.getWindow().getDecorView(),art.velyntora.core.DrawingView.class);
+            assertNotNull(canvas);
+            assertEquals(320,canvas.documentWidth());
+            assertEquals(800,canvas.documentHeight());
             assertTrue("Immersive navigation enabled",(editor.getWindow().getDecorView().getSystemUiVisibility()&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)!=0);
             Bitmap logo=app.velyntora.ui.common.BrandLogo.load(home);
             boolean transparent=false;for(int y=0;y<logo.getHeight()&&!transparent;y++)for(int x=0;x<logo.getWidth();x++)if(Color.alpha(logo.getPixel(x,y))==0){transparent=true;break;}
             assertTrue("Logo background must be transparent",transparent);
         });
-        // The new-canvas dialog is the only focusable window with dimension inputs.
-        assertTrue("Dimension dialog must own window focus",editor.hasWindowFocus()==false);
-        systemBack();
         instrumentation.runOnMainSync(()->{editor.finish();home.finish();});
         instrumentation.removeMonitor(monitor);
     }
@@ -49,7 +58,7 @@ public final class EditorIntegrationTest {
         try{
             Bitmap image=Bitmap.createBitmap(79,53,Bitmap.Config.ARGB_8888);image.eraseColor(Color.MAGENTA);
             try(java.io.OutputStream out=context.getContentResolver().openOutputStream(uri)){assertTrue(image.compress(Bitmap.CompressFormat.PNG,100,out));}catch(java.io.IOException error){throw new AssertionError(error);}finally{image.recycle();}
-            Intent intent=new Intent(context,art.velyntora.core.MainActivity.class).setAction("app.velyntora.drawing.OPEN").setData(uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent intent=art.velyntora.core.EditorEntry.open(context,uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             editor=instrumentation.startActivitySync(intent);final Activity opened=editor;
             java.util.concurrent.atomic.AtomicBoolean imported=new java.util.concurrent.atomic.AtomicBoolean();
             long deadline=SystemClock.uptimeMillis()+15000;

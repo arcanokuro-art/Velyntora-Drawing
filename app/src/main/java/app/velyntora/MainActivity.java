@@ -10,7 +10,8 @@ public final class MainActivity extends Activity implements StartActions {
     @Override public void onWindowFocusChanged(boolean hasFocus){super.onWindowFocusChanged(hasFocus);if(hasFocus)app.velyntora.ui.common.ImmersiveMode.apply(getWindow());}
     @Override protected void onResume(){super.onResume();app.velyntora.ui.common.ImmersiveMode.apply(getWindow());}
     private void info(String title,String message){new AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton("Aceptar",null).show();}
-    public void createIllustration(){app.velyntora.editor.EditorNavigator.create(this);}
+    public void createIllustration(){showCreateDialog();}
+    AlertDialog showCreateDialog(){return app.velyntora.editor.EditorNavigator.create(this);}
     private static final int OPEN_IMAGE=2001;
     public void openImage(){
         Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
