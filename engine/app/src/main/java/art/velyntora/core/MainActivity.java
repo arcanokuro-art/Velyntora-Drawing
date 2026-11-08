@@ -161,6 +161,7 @@ public final class MainActivity extends Activity {
 
   @Override
   public void onBackPressed() {
+    if(workspaceComposition.closePhonePanel())return;
     if(drawing!=null && drawing.placedImage().active()){drawing.placedImage().cancel();return;}
     protectDocument(() -> super.onBackPressed());
   }
@@ -366,6 +367,7 @@ public final class MainActivity extends Activity {
 
   void syncToolState() {
     toolControls.syncToolState();
+    refreshPhoneTools();
   }
 
   Button iconButton(LinearLayout parent, String label, String glyph, Runnable action) {
@@ -665,6 +667,9 @@ public final class MainActivity extends Activity {
   android.graphics.Bitmap writeSelectionClipboard(android.graphics.Bitmap value) { selectionClipboard = value; return value; }
   int readWandTolerance() { return wandTolerance; }
   int writeWandTolerance(int value) { wandTolerance = value; return value; }
+  View toolOptionsView() { return toolControls.optionsView(); }
+  void layoutToolOptions(WorkspaceLayout layout,int widthDp) { toolControls.layoutPhone(layout,widthDp); }
+  void refreshPhoneTools() { workspaceComposition.refreshPhoneTools(); }
   void composeColorPanel(LinearLayout root) { colorPanel.create(root); }
   void composeLayersPanel(LinearLayout root) { layersPanel.create(root); }
   void composeToolControls(LinearLayout root) { toolControls.create(root); }

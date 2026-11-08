@@ -9,6 +9,10 @@ public final class WorkspaceLayoutTests {
    check(layout.compact==(height<480));
    if(font>1&&width>=720)check(layout.layersWidth>=192);
   }
+  check(new WorkspaceLayout(393,852,1f).phone);
+  check(new WorkspaceLayout(852,393,1f).phone);
+  check(!new WorkspaceLayout(800,1280,1f).phone);
+  check(new WorkspaceLayout(1280,450,1f).inline);
   for(float invalid:new float[]{0,-1,Float.NaN,Float.POSITIVE_INFINITY})try{new WorkspaceLayout(800,600,invalid);throw new AssertionError();}catch(IllegalArgumentException expected){}
   try{new WorkspaceLayout(0);throw new AssertionError();}catch(IllegalArgumentException expected){}
   System.out.println("Phone/tablet/split-window/font-scale and compact-height layout policy passed");

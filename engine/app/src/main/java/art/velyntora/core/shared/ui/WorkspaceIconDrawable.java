@@ -30,6 +30,15 @@ final class WorkspaceIconDrawable extends Drawable {
     c.translate(getBounds().left, getBounds().top);
     c.scale(getBounds().width() / 24f, getBounds().height() / 24f);
     switch (glyph) {
+      case "more":
+        for(int x=4;x<=20;x+=8)c.drawCircle(x,12,1.2f,paint);
+        break;
+      case "fit":
+        line(c,3,8,3,3,8,3);
+        line(c,16,3,21,3,21,8);
+        line(c,21,16,21,21,16,21);
+        line(c,8,21,3,21,3,16);
+        break;
       case "menu":
         line(c, 4, 6, 20, 6);
         line(c, 4, 12, 20, 12);

@@ -2,7 +2,7 @@ package art.velyntora.core;
 
 /** Layout policy in dp; overlays never consume canvas width. */
 final class WorkspaceLayout {
-  final boolean inline, compact;
+  final boolean inline, compact, phone;
   final int toolsWidth, layersWidth, canvasWidth;
 
   WorkspaceLayout(int widthDp) {
@@ -17,7 +17,8 @@ final class WorkspaceLayout {
         Math.min(
             Math.min(320, Math.round(264 * Math.max(1f, Math.min(2f, fontScale)))),
             Math.max(48, widthDp - 48));
-    inline = widthDp >= 720 && widthDp - toolsWidth - layersWidth >= 240;
+    phone = widthDp < 600 || (widthDp < 1000 && heightDp < 600);
+    inline = !phone && widthDp >= 720 && widthDp - toolsWidth - layersWidth >= 240;
     compact = heightDp < 480;
     canvasWidth = inline ? widthDp - toolsWidth - layersWidth : widthDp;
   }

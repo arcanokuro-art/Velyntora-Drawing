@@ -29,7 +29,79 @@ final class ToolControls {
   private PlacedImageControls placedImageControls;
   private TextView sizeLabel;
   private SeekBar sizeSlider;
-  private boolean syncingSize;
+  private boolean syncingSize, phone;
+  private LinearLayout optionsRow, tuning, sizeRow, opacityRow;
+  private HorizontalScrollView optionsScroll;
+  private android.widget.GridLayout grid;
+  private int sizeLabelWidth;
+  private final java.util.ArrayList<Button> toolOrder=new java.util.ArrayList<>();
+  private static final String[] PHONE_GROUPS={"Dibujo","Selección","Transformar y navegar","Color y retoque"};
+  private static final int[][] PHONE_TOOLS={
+      {DrawingView.BRUSH,DrawingView.ERASER,DrawingView.PENCIL,DrawingView.LINE,DrawingView.RECTANGLE,DrawingView.FREEFORM,DrawingView.TEXT},
+      {DrawingView.SELECT_RECTANGLE,DrawingView.SELECT_ELLIPSE,DrawingView.SELECT_FREE,DrawingView.MAGIC_WAND},
+      {DrawingView.MOVE_PIXELS,DrawingView.MOVE_SELECTION,DrawingView.ZOOM,DrawingView.PAN},
+      {DrawingView.BUCKET,DrawingView.GRADIENT,DrawingView.PICKER,DrawingView.CLONE,DrawingView.RECOLOR,DrawingView.REMOVE_AI}
+  };
+
+  View optionsView(){return optionsScroll;}
+
+  void layoutPhone(WorkspaceLayout layout,int widthDp){
+    phone=layout.phone;
+    boolean stacked=phone&&!layout.compact;
+    tuning.setOrientation(stacked?LinearLayout.VERTICAL:LinearLayout.HORIZONTAL);
+    tuning.setLayoutParams(new LinearLayout.LayoutParams(stacked?host.dp(Math.max(192,widthDp-48)):-2,-2));
+    sizeRow.setLayoutParams(new LinearLayout.LayoutParams(stacked?-1:-2,-2));
+    opacityRow.setLayoutParams(new LinearLayout.LayoutParams(stacked?-1:-2,-2));
+    sizeLabel.setLayoutParams(new LinearLayout.LayoutParams(stacked?host.dp(112):sizeLabelWidth,-2));
+    sizeSlider.setLayoutParams(stacked?new LinearLayout.LayoutParams(0,host.dp(40),1):
+        new LinearLayout.LayoutParams(host.dp(120),host.dp(48)));
+    SeekBar opacity=(SeekBar)opacityRow.getChildAt(1);
+    opacity.setLayoutParams(stacked?new LinearLayout.LayoutParams(0,host.dp(40),1):
+        new LinearLayout.LayoutParams(host.dp(120),host.dp(48)));
+    TextView name=host.readSelectedTool();
+    optionsRow.removeView(name);
+    optionsRow.addView(name,phone?1:0);
+    grid.removeAllViews();
+    if(phone){
+      int row=0;
+      for(int group=0;group<PHONE_GROUPS.length;group++){
+        TextView title=host.text(PHONE_GROUPS[group]);
+        title.setPadding(host.dp(10),host.dp(10),0,host.dp(4));
+        grid.addView(title,new android.widget.GridLayout.LayoutParams(
+            android.widget.GridLayout.spec(row++),android.widget.GridLayout.spec(0,2)));
+        for(int i=0;i<PHONE_TOOLS[group].length;i++){
+          Button button=host.readToolButtons().get(PHONE_TOOLS[group][i]);
+          addToolCell(button,row+i/2,i%2,widthDp,true);
+        }
+        row+=(PHONE_TOOLS[group].length+1)/2;
+      }
+    }else{
+      for(int i=0;i<toolOrder.size();i++)addToolCell(toolOrder.get(i),i/2,i%2,widthDp,false);
+    }
+    optionsScroll.setHorizontalScrollBarEnabled(phone);
+    optionsScroll.scrollTo(0,0);
+    syncSizeControl();
+  }
+
+  private void addToolCell(Button button,int row,int column,int widthDp,boolean phone){
+    android.widget.GridLayout.LayoutParams cell=new android.widget.GridLayout.LayoutParams(
+        android.widget.GridLayout.spec(row),android.widget.GridLayout.spec(column));
+    cell.width=host.dp(phone?Math.max(104,(widthDp-8)/2):48);
+    cell.height=host.dp(phone?60:48);
+    button.setText(phone?button.getContentDescription().toString().split(":",2)[0]:"");
+    button.setTextSize(12);
+    button.setMaxLines(2);
+    button.setGravity(Gravity.CENTER);
+    button.setPadding(host.dp(phone?2:0),host.dp(phone?4:12),host.dp(phone?2:0),host.dp(phone?4:12));
+    grid.addView(button,cell);
+  }
+
+  private String sizeText(int size){return (phone?"Tamaño: ":"Anchura del pincel: ")+size+" px";}
+  private void dismissToolPanel(){
+    if(!host.readPanelsInline() && host.readToolScroll()!=null && host.readToolScroll().getVisibility()==View.VISIBLE)
+      host.togglePanel(host.readToolScroll());
+  }
+
   private LinearLayout brushSettingsParent;
   private Button brushSettingsButton;
   private int brushSettingsIndex;
@@ -57,7 +129,7 @@ final class ToolControls {
     sizeSlider.setContentDescription(wand ? "Tolerancia" : "Anchura del pincel en píxeles");
     sizeSlider.setMax(wand ? 255 : 299);
     sizeSlider.setProgress(wand ? value : value - 1);
-    sizeLabel.setText(wand ? "Tolerancia: " + value : "Anchura del pincel: " + value + " px");
+    sizeLabel.setText(wand ? "Tolerancia: " + value : sizeText(value));
     syncingSize = false;
   }
   ToolControls(MainActivity host) { this.host = host; }
@@ -134,7 +206,7 @@ final class ToolControls {
           if(tool==DrawingView.RECTANGLE){
             FigurasSelector.show(iconButton,host.readDrawing(),()->{
               host.readDrawing().setColor(host.readActiveColor());host.syncToolState();
-              if(!host.readPanelsInline() && host.readToolScroll()!=null)host.readToolScroll().setVisibility(View.GONE);
+              dismissToolPanel();
             });
             return;
           }
@@ -143,12 +215,13 @@ final class ToolControls {
           host.syncToolState();
           if (tool == DrawingView.BRUSH)
             BrushSelector.show(iconButton,host.readDrawing(),host::syncToolState);
-          if (tool != DrawingView.BRUSH && !host.readPanelsInline() && host.readToolScroll() != null) host.readToolScroll().setVisibility(View.GONE);
+          if (tool != DrawingView.BRUSH) dismissToolPanel();
         });
     android.widget.GridLayout.LayoutParams cell = new android.widget.GridLayout.LayoutParams();
     cell.width = host.dp(48);
     cell.height = host.dp(48);
     parent.addView(iconButton, cell);
+    toolOrder.add(iconButton);
   }
 
   void syncToolState() {
@@ -245,6 +318,7 @@ final class ToolControls {
 
   void create(LinearLayout root) {
     LinearLayout options = host.row();
+    optionsRow=options;
     host.writeSelectedTool(host.text("Pincel"));
     host.readSelectedTool().setPadding(host.dp(8), 0, host.dp(16), 0);
     host.readSelectedTool().setSingleLine(true);
@@ -258,6 +332,7 @@ final class ToolControls {
 
     android.widget.GridLayout toolGrid = new android.widget.GridLayout(host);
     toolGrid.setColumnCount(2);
+    grid=toolGrid;
     sidebar.addView(toolGrid);
     host.tool(toolGrid, "Mover píxeles", DrawingView.MOVE_PIXELS);
     host.tool(toolGrid, "Cubeta", DrawingView.BUCKET);
@@ -295,7 +370,12 @@ final class ToolControls {
     int widthLabelSpace = (int) Math.ceil(
         brushSizeLabel.getPaint().measureText("Anchura del pincel: 888 px"))
         + brushSizeLabel.getPaddingLeft() + brushSizeLabel.getPaddingRight() + host.dp(8);
-    options.addView(brushSizeLabel, new LinearLayout.LayoutParams(widthLabelSpace, -2));
+    sizeLabelWidth=widthLabelSpace;
+    tuning=host.row();
+    sizeRow=host.row();opacityRow=host.row();
+    tuning.addView(sizeRow);tuning.addView(opacityRow);
+    options.addView(tuning);
+    sizeRow.addView(brushSizeLabel,new LinearLayout.LayoutParams(widthLabelSpace,-2));
     SeekBar brushSize = new SeekBar(host);
     sizeLabel = brushSizeLabel;
     sizeSlider = brushSize;
@@ -324,7 +404,7 @@ final class ToolControls {
               return;
             }
             int size = progress + 1;
-            brushSizeLabel.setText("Anchura del pincel: " + size + " px");
+            brushSizeLabel.setText(sizeText(size));
             host.readDrawing().setBrushRadius(size / 2f);
           }
 
@@ -336,8 +416,8 @@ final class ToolControls {
         });
     host.readDrawing().brushWidthChanged = this::syncSizeControl;
     syncSizeControl();
-    options.addView(brushSize, new LinearLayout.LayoutParams(host.dp(120), host.dp(48)));
-    OpacityControls.attach(host, host.readDrawing(), options);
+    sizeRow.addView(brushSize, new LinearLayout.LayoutParams(host.dp(120), host.dp(48)));
+    OpacityControls.attach(host, host.readDrawing(), opacityRow);
     brushSettingsParent=options;brushSettingsIndex=options.getChildCount();
     syncBrushSettingsControl();
     host.writeGradientOptions(host.iconButton(options, "Configurar degradado", "gradient", host::configureGradient));
@@ -346,7 +426,7 @@ final class ToolControls {
     SelectionConfirmationControls.attach(host,options);
     host.readDrawing().removeAi().controls(options);
     placedImageControls=new PlacedImageControls(host,options);
-    host.addScrollable(root, options);
+    optionsScroll=host.addScrollable(root, options);
     ScrollView toolScroll = new ScrollView(host);
     toolScroll.addView(sidebar);
     host.writeToolScroll(toolScroll);

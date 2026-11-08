@@ -14,7 +14,7 @@ final class PlacedImageControls {
     heading=host.text("Imagen  ");row.addView(heading);
     editText=host.button(row,"Editar texto",()->TextDialog.edit(host));
     crop=host.iconButton(row,"Recortar imagen","rectangle",()->PlacedImageCropDialog.show(host,session));
-    host.iconButton(row,"Girar o voltear","redo",this::showOrientation);
+    host.iconButton(row,"Girar o voltear","redo",()->showOrientation(host,session));
     CheckBox ratio=new CheckBox(host);ratio.setText("Proporciones");ratio.setChecked(true);ratio.setOnCheckedChangeListener((b,v)->session.keepRatio=v);row.addView(ratio);
     opacityLabel=host.text("Opacidad: 100 %");row.addView(opacityLabel);
     opacity=new SeekBar(host);opacity.setMax(100);opacity.setContentDescription("Opacidad de imagen insertada");row.addView(opacity,new LinearLayout.LayoutParams(host.dp(120),host.dp(48)));
@@ -29,7 +29,7 @@ final class PlacedImageControls {
     for(int i=0;i<row.getChildCount();i++){View child=row.getChildAt(i);LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)child.getLayoutParams();params.setMargins(0,host.dp(4),host.dp(12),host.dp(4));child.setLayoutParams(params);}
     session.changed=this::sync;sync();
   }
-  private void showOrientation(){
+  static void showOrientation(MainActivity host,PlacedImageSession session){
     MenuChoices.show(host,"Girar o voltear",new String[]{
       "Girar 90° a la izquierda","Girar 90° a la derecha",
       "Voltear horizontalmente","Voltear verticalmente"
@@ -42,5 +42,6 @@ final class PlacedImageControls {
       syncing=true;opacity.setProgress(Math.round(session.state.opacity*100));opacityLabel.setText("Opacidad: "+opacity.getProgress()+" %");syncing=false;
     }else{for(var entry:hidden.entrySet())entry.getKey().setVisibility(entry.getValue());hidden.clear();}
     row.setVisibility(active?View.VISIBLE:View.GONE);
+    host.refreshPhoneTools();
   }
 }

@@ -61,6 +61,7 @@ final class ColorPanel {
   void setActiveColor(int color) {
     host.writeActiveColor(color);
     host.readDrawing().setColor(color);
+    host.refreshPhoneTools();
     if (host.readCurrentColorButton() != null) {
       host.readCurrentColorButton().setBackground(new ColorSwatchDrawable(color));
       String label =
