@@ -1,27 +1,8 @@
 package art.velyntora.core;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.Bundle;
 import android.view.Gravity;
-import android.view.View;
-import android.widget.Button;
 import android.widget.HorizontalScrollView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-
 
 final class CommandBar {
  private final MainActivity host;
@@ -29,7 +10,9 @@ final class CommandBar {
 
   void create(LinearLayout root) {
     LinearLayout header = host.row();
-    host.iconButton(header, "Menú principal", "menu", host::openMainMenu);
+    int height = host.dp(48);
+    LinearLayout leading = host.row();
+    host.iconButton(leading, "Menú principal", "menu", host::openMainMenu);
     LinearLayout commands = host.row();
     host.iconButton(commands, "Nuevo", "new", () -> host.protectDocument(() -> host.configureDimensions(0)));
     host.iconButton(commands, "Abrir", "open", host::openImage);
@@ -39,14 +22,19 @@ final class CommandBar {
     HorizontalScrollView shortcuts = new HorizontalScrollView(host);
     shortcuts.setHorizontalScrollBarEnabled(false);
     shortcuts.addView(commands);
-    header.addView(shortcuts, new LinearLayout.LayoutParams(0, host.dp(48), 1));
+    leading.addView(shortcuts, new LinearLayout.LayoutParams(0, height, 1));
+    // Equal side widths keep the title centered on the full bar.
+    header.addView(leading, new LinearLayout.LayoutParams(0, height, 2));
     host.writeDocumentTitle(host.text("Imagen no guardada — Velyntora Drawing"));
     host.readDocumentTitle().setSingleLine(true);
     host.readDocumentTitle().setEllipsize(android.text.TextUtils.TruncateAt.END);
     host.readDocumentTitle().setGravity(Gravity.CENTER);
-    header.addView(host.readDocumentTitle(), new LinearLayout.LayoutParams(0, host.dp(48), 1));
-    host.iconButton(header, "Herramientas", "tools", () -> host.togglePanel(host.readToolScroll()));
-    host.iconButton(header, "Capas", "layers", () -> host.togglePanel(host.readLayerScroll()));
+    header.addView(host.readDocumentTitle(), new LinearLayout.LayoutParams(0, height, 1));
+    LinearLayout trailing = host.row();
+    trailing.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+    host.iconButton(trailing, "Herramientas", "tools", () -> host.togglePanel(host.readToolScroll()));
+    host.iconButton(trailing, "Capas", "layers", () -> host.togglePanel(host.readLayerScroll()));
+    header.addView(trailing, new LinearLayout.LayoutParams(0, height, 2));
     root.addView(header);
 
   }
