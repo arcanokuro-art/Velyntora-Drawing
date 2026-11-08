@@ -24,11 +24,11 @@ struct Source {
 };
 struct Element {
   std::shared_ptr<const Source> source;
-  // crop L,T,R,B; center X,Y; displayed width,height; angle.
+  // crop L,T,R,B; center X,Y; displayed width,height (negative when mirrored); angle.
   std::array<float,9> transform;
   bool valid()const{
     for(float v:transform)if(!std::isfinite(v) || std::abs(v)>1000000)return false;
-    return source && transform[0]>=0 && transform[1]>=0 && transform[2]>transform[0] && transform[3]>transform[1] && transform[2]<=6000 && transform[3]<=6000 && transform[6]>=1 && transform[7]>=1 && transform[6]<=24000 && transform[7]<=24000;
+    return source && transform[0]>=0 && transform[1]>=0 && transform[2]>transform[0] && transform[3]>transform[1] && transform[2]<=6000 && transform[3]<=6000 && std::abs(transform[6])>=1 && std::abs(transform[7])>=1 && std::abs(transform[6])<=24000 && std::abs(transform[7])<=24000;
   }
 };
 }

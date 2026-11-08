@@ -16,7 +16,7 @@ final class TextLayerEditing {
         session.begin(rendered[0]);if(session.source!=rendered[0])return;session.text=normalized;
         session.state.width=session.source.size.displayWidth();session.state.height=session.source.size.displayHeight();session.state.cx=x+session.state.width/2;session.state.cy=y+session.state.height/2;session.state.opacity=drawing.toolOpacityPercent()/100f;
       }else{
-        session.remember();PlacedImageTransform state=session.state;float[] origin={0,0};state.matrix().mapPoints(origin);float sx=stretch,sy=1;
+        session.remember();PlacedImageTransform state=session.state;float[] origin=state.handles();float sx=stretch,sy=1;
         session.retainSource(rendered[0]);session.text=normalized;state.crop=new RectF(0,0,session.source.size.displayWidth(),session.source.size.displayHeight());state.width=state.crop.width()*sx;state.height=state.crop.height()*sy;
         float fit=Math.min(1,Math.min(24000/state.width,24000/state.height));state.width*=fit;state.height*=fit;
         double angle=Math.toRadians(state.angle);state.cx=origin[0]+(float)(state.width/2*Math.cos(angle)-state.height/2*Math.sin(angle));state.cy=origin[1]+(float)(state.width/2*Math.sin(angle)+state.height/2*Math.cos(angle));

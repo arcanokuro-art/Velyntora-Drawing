@@ -12,3 +12,9 @@ los tiradores siguen visibles fuera del lienzo mientras se edita.
 Los tiradores de tamaño también encajan con los bordes y centros del lienzo.
 La esquina o el centro del lado opuesto permanece fijo. Al mantener proporciones,
 el ajuste usa una escala uniforme y solo muestra las guías que coinciden.
+
+El menú «Girar o voltear» aplica giros de 90° y reflejos sobre los ejes del
+documento alrededor del centro del objeto. Cada acción entra en el historial
+del editor. El reflejo no altera el archivo original: el proyecto lo conserva
+mediante el signo del ancho o alto en la transformación guardada. Las medidas
+del marco y sus tiradores se mantienen independientes del reflejo.

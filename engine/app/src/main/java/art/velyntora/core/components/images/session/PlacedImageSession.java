@@ -80,7 +80,15 @@ final class PlacedImageSession {
   void remember(){if(active()){undo.addLast(new EditState(state));redo.clear();}}
   void undo(){guides.clear();if(!active() || undo.isEmpty())return;redo.addLast(new EditState(state));undo.removeLast().restore();notifyChanged();}
   void redo(){guides.clear();if(!active() || redo.isEmpty())return;undo.addLast(new EditState(state));redo.removeLast().restore();notifyChanged();}
-  void rotate(){if(!active())return;remember();state.angle=(state.angle+90)%360;notifyChanged();}
+  void rotate(){rotate(90);}
+  void rotate(int degrees){
+    if(!active() || committing)return;
+    remember();guides.clear();state.angle=(state.angle+degrees+360)%360;notifyChanged();
+  }
+  void flip(boolean horizontal){
+    if(!active() || committing)return;
+    remember();guides.clear();state.flip(horizontal);notifyChanged();
+  }
   void cropTo(RectF rect){if(!active() || rect.width()<1 || rect.height()<1)return;remember();state.cropTo(rect);notifyChanged();}
   void cancel(){if(committing || host().readProjectProgress()!=null)return;clear();}
   private void clear(){
@@ -106,7 +114,7 @@ final class PlacedImageSession {
     if(!active())return true;
     if(host().readProjectProgress()!=null)return false;
     if(label.equals("Deshacer")){undo();return false;}if(label.equals("Rehacer")){redo();return false;}
-    return label.equals("Editar texto") || label.equals("Confirmar imagen") || label.equals("Cancelar imagen") || label.equals("Recortar imagen") || label.equals("Rotar imagen");
+    return label.equals("Editar texto") || label.equals("Confirmar imagen") || label.equals("Cancelar imagen") || label.equals("Recortar imagen") || label.equals("Girar o voltear");
   }
   void cancelGesture(){guides.clear();if(dragStart!=null){state=dragStart;dragStart=null;notifyChanged();}}
   boolean touch(MotionEvent event,float x,float y){

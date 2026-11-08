@@ -6,7 +6,7 @@
 using namespace velyntora;
 int main(){
   std::vector<unsigned char> original(150000);for(std::size_t i=0;i<original.size();i++)original[i]=i%251;
-  std::size_t pos=0;auto image=std::make_shared<images::Element>();image->transform={1,2,100,80,120,110,160,120,32};
+  std::size_t pos=0;auto image=std::make_shared<images::Element>();image->transform={1,2,100,80,120,110,-160,120,32};
   image->source=std::make_shared<images::Source>(original.size(),[&](void* p,std::size_t n){std::memcpy(p,original.data()+pos,n);pos+=n;});
   LayerDocument doc(256,256);doc.addLayer("Editable");doc.setActiveImage(image);doc.setOpacity(1,.4f);doc.setBlendMode(1,4);
   history::HistoryArchive archive("/tmp");auto before=archive.capture(doc);
@@ -21,6 +21,6 @@ int main(){
   auto changed=doc.layer(1).pixels;changed[100]=1;doc.replaceActivePixels(changed);assert(!doc.layer(1).image);
   doc=archive.restore(before);doc.mergeDown();assert(!doc.layer(0).image);
   doc=archive.restore(before);assert(!doc.resized(128,128,true).layer(1).image);assert(!doc.cropped(0,0,128,128).layer(1).image);
-  bool rejected=false;auto invalid=std::make_shared<images::Element>(*image);invalid->transform[6]=-1;try{doc.setActiveImage(invalid);}catch(...){rejected=true;}assert(rejected);
+  bool rejected=false;auto invalid=std::make_shared<images::Element>(*image);invalid->transform[6]=0;try{doc.setActiveImage(invalid);}catch(...){rejected=true;}assert(rejected);
   std::cout<<"Image source persistence, history, duplicate, reorder and rasterization passed\n";
 }

@@ -85,7 +85,7 @@ final class VlyProjectStream {
         int has=integer(in);if(has<0 || has>1)throw new IOException("Elemento inválido");
         if(has==1){
           float[] t=new float[9];for(int i=0;i<9;i++){t[i]=Float.intBitsToFloat(integer(in));if(Float.isNaN(t[i]) || Float.isInfinite(t[i]) || Math.abs(t[i])>1000000)throw new IOException("Transformación inválida");}
-          if(t[0]<0 || t[1]<0 || t[2]<=t[0] || t[3]<=t[1] || t[2]>6000 || t[3]>6000 || t[6]<1 || t[7]<1 || t[6]>24000 || t[7]>24000)throw new IOException("Transformación inválida");
+          if(t[0]<0 || t[1]<0 || t[2]<=t[0] || t[3]<=t[1] || t[2]>6000 || t[3]>6000 || Math.abs(t[6])<1 || Math.abs(t[7])<1 || Math.abs(t[6])>24000 || Math.abs(t[7])>24000)throw new IOException("Transformación inválida");
           int bytes=integer(in);if(bytes<1 || bytes>256*1024*1024)throw new IOException("Fuente inválida");
           byte[] buffer=new byte[65536];while(bytes>0){int n=Math.min(bytes,buffer.length);in.readFully(buffer,0,n);bytes-=n;}
         }

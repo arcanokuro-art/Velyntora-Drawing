@@ -6,7 +6,7 @@ public final class VlyImageElementStreamTests {
     VlyProjectStream.header(out,2,2,2,1);
     VlyProjectStream.layer(out,new VlyProjectStream.Layer("Imagen",true,.5f,new int[]{1,2,3,4},4),4);
     VlyProjectStream.integer(out,1);
-    for(float v:new float[]{0,0,2,2,1,1,2,2,0})VlyProjectStream.integer(out,Float.floatToIntBits(v));
+    for(float v:new float[]{0,0,2,2,1,1,-2,2,0})VlyProjectStream.integer(out,Float.floatToIntBits(v));
     VlyProjectStream.integer(out,150000);out.write(new byte[150000]);
     VlyProjectStream.layer(out,new VlyProjectStream.Layer("Superior",true,1,new int[]{5,6,7,8}),4);VlyProjectStream.integer(out,0);
     byte[] bytes=buffer.toByteArray();bytes[7]=3;
