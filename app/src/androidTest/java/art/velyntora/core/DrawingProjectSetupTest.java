@@ -20,6 +20,38 @@ public final class DrawingProjectSetupTest {
     if(root instanceof ViewGroup){ViewGroup group=(ViewGroup)root;for(int i=0;i<group.getChildCount();i++){CheckBox found=checkbox(group.getChildAt(i));if(found!=null)return found;}}
     return null;
   }
+  @Test public void homeSetupOnlyOpensEditorAfterConfirmingChosenDimensions(){
+    android.content.Context context=instrumentation.getTargetContext();
+    Activity home=instrumentation.startActivitySync(new Intent(context,app.velyntora.MainActivity.class)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    Instrumentation.ActivityMonitor monitor=instrumentation.addMonitor(MainActivity.class.getName(),null,false);
+    Activity opened=null;
+    try{
+      instrumentation.runOnMainSync(()->{
+        DrawingProjectSetup.OnCreate start=(width,height)->home.startActivity(EditorEntry.create(home,width,height));
+        AlertDialog canceled=DrawingProjectSetup.showFromStart(home,start);
+        canceled.getButton(AlertDialog.BUTTON_NEGATIVE).performClick();
+        assertEquals(0,monitor.getHits());
+        AlertDialog confirmed=DrawingProjectSetup.showFromStart(home,start);
+        View form=confirmed.getWindow().getDecorView();
+        ((EditText)find(form,"Ancho en píxeles")).setText("320");
+        ((EditText)find(form,"Alto en píxeles")).setText("240");
+        assertEquals(0,monitor.getHits());
+        confirmed.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+      });
+      opened=instrumentation.waitForMonitorWithTimeout(monitor,5000);
+      assertNotNull("Confirmation must launch the editor",opened);
+      MainActivity editor=(MainActivity)opened;
+      instrumentation.runOnMainSync(()->{
+        assertEquals(320,editor.readDrawing().documentWidth());
+        assertEquals(240,editor.readDrawing().documentHeight());
+      });
+    }finally{
+      instrumentation.removeMonitor(monitor);
+      Activity editor=opened;
+      instrumentation.runOnMainSync(()->{if(editor!=null)editor.finish();home.finish();});
+    }
+  }
   @Test public void presetsMatchReferenceAndRespectCanvasBudget(){
     DrawingPresets.Preset[] presets=DrawingPresets.all();assertEquals(8,presets.length);
     assertEquals("Doujinshi",presets[5].name);assertEquals("Manga",presets[6].name);assertEquals("Manhwa",presets[7].name);

@@ -1,6 +1,6 @@
 # Configuración de ilustraciones
 
-Implementación Android de `Velyntora-Para-Velyntora/drawing_project_setup/README.md` (referencia `75a4b4873c0a229e06f181a51b27822804e24e30`). Se usa desde Inicio → Crear ilustración y Archivo → Nuevo, mediante `configureDimensions(0)`. No modifica el repositorio de referencia.
+Implementación Android de `Velyntora-Para-Velyntora/drawing_project_setup/README.md` (referencia `75a4b4873c0a229e06f181a51b27822804e24e30`). Inicio → Crear ilustración muestra el formulario en Inicio y solo abre el editor con las dimensiones confirmadas. Dentro del editor, Nuevo usa el mismo formulario mediante `configureDimensions(0)`. No modifica el repositorio de referencia.
 
 - `DrawingPresets`: catálogo puro de los ocho tamaños de dibujo y cálculo proporcional dentro de CanvasLimits.
 - `DrawingProjectSetup`: formulario con ancho/alto en píxeles, vínculo opcional de proporción, presets y creación validada. Cambiar un tamaño manual vuelve a Personalizado. Elegir un preset actualiza la proporción vinculada.

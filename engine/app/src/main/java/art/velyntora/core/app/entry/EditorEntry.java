@@ -4,13 +4,28 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
 /** Drawing start-screen entry; preserves Core's document protection and import pipeline. */
-final class EditorEntry {
+public final class EditorEntry {
     private EditorEntry(){}
-    static boolean hasRequest(Intent intent){return intent!=null && ("app.velyntora.drawing.CREATE".equals(intent.getAction()) || "app.velyntora.drawing.OPEN".equals(intent.getAction()));}
+    private static final String CREATE="app.velyntora.drawing.CREATE", OPEN="app.velyntora.drawing.OPEN";
+    private static final String WIDTH="canvasWidth", HEIGHT="canvasHeight";
+    public static Intent create(android.content.Context context,int width,int height){
+        return new Intent(context,MainActivity.class).setAction(CREATE).putExtra(WIDTH,width).putExtra(HEIGHT,height);
+    }
+    public static Intent open(android.content.Context context,android.net.Uri uri){
+        return new Intent(context,MainActivity.class).setAction(OPEN).setData(uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    }
+    static boolean hasRequest(Intent intent){return intent!=null && (CREATE.equals(intent.getAction()) || OPEN.equals(intent.getAction()));}
     static void enter(MainActivity host,Bundle state){
         Intent intent=host.getIntent();
         if(state!=null || !hasRequest(intent))return;
-        if("app.velyntora.drawing.CREATE".equals(intent.getAction()))host.protectDocument(()->host.configureDimensions(0));
+        if(CREATE.equals(intent.getAction())){
+            if(!host.readDrawing().newDocument(intent.getIntExtra(WIDTH,0),intent.getIntExtra(HEIGHT,0))){
+                host.message("No se pudo crear la ilustración con el tamaño elegido");
+                host.finish();
+                return;
+            }
+            host.markDocumentClean("Sin título");
+        }
         else if(intent.getData()!=null)host.protectDocument(()->host.openDetected(intent.getData()));
     }
     static void immersive(Window window){

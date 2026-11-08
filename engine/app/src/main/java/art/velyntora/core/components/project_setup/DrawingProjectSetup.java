@@ -1,13 +1,24 @@
 package art.velyntora.core;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.text.*;
 import android.view.View;
 import android.widget.*;
 
 /** Creates illustrations; resizing existing content remains in document/dimensions. */
-final class DrawingProjectSetup {
-  private final MainActivity host;
+public final class DrawingProjectSetup {
+  private final Activity host;
+  private final MainActivity editor;
+  private final Submit submit;
+  private interface Submit { boolean create(int width,int height); }
+  public interface OnCreate { void create(int width,int height); }
+
+  public static AlertDialog showFromStart(Activity host,OnCreate onCreate){
+    return new DrawingProjectSetup(host,null,800,800,(width,height)->{
+      onCreate.create(width,height);return true;
+    }).show();
+  }
   private final EditText width,height;
   private final CheckBox linked;
   private final Spinner presets;
@@ -15,13 +26,23 @@ final class DrawingProjectSetup {
   private int ratioWidth,ratioHeight,lastEdited;
   private boolean updating;
   DrawingProjectSetup(MainActivity host){
-    this.host=host;
-    width=field("Ancho en píxeles",host.readDrawing().documentWidth());
-    height=field("Alto en píxeles",host.readDrawing().documentHeight());
-    ratioWidth=host.readDrawing().documentWidth();ratioHeight=host.readDrawing().documentHeight();
+    this(host,host,host.readDrawing().documentWidth(),host.readDrawing().documentHeight(),(width,height)->{
+      if(!host.readDrawing().newDocument(width,height))return false;
+      host.markDocumentClean("Sin título");return true;
+    });
+  }
+  private DrawingProjectSetup(Activity host,MainActivity editor,int initialWidth,int initialHeight,Submit submit){
+    this.host=host;this.editor=editor;this.submit=submit;
+    width=field("Ancho en píxeles",initialWidth);
+    height=field("Alto en píxeles",initialHeight);
+    ratioWidth=initialWidth;ratioHeight=initialHeight;
     linked=new CheckBox(host);linked.setText("Mantener proporciones");
     presets=new Spinner(host);presets.setContentDescription("Presets de dibujo");
   }
+  private TextView text(String label){
+    TextView view=new TextView(host);view.setText(label);view.setTextSize(12);return view;
+  }
+  private void message(String message){Toast.makeText(host,message,Toast.LENGTH_SHORT).show();}
   private EditText field(String description,int value){
     EditText field=new EditText(host);field.setInputType(InputType.TYPE_CLASS_NUMBER);field.setSingleLine(true);
     field.setContentDescription(description);field.setText(Integer.toString(value));return field;
@@ -55,18 +76,18 @@ final class DrawingProjectSetup {
   }
   AlertDialog show(){
     LinearLayout form=new LinearLayout(host);form.setOrientation(LinearLayout.VERTICAL);
-    form.addView(host.text("Tamaño del lienzo"));
-    form.addView(host.text("Ancho (px)"));form.addView(width);
-    form.addView(host.text("Alto (px)"));form.addView(height);
+    form.addView(text("Tamaño del lienzo"));
+    form.addView(text("Ancho (px)"));form.addView(width);
+    form.addView(text("Alto (px)"));form.addView(height);
     form.addView(linked);
-    form.addView(host.text("Presets de dibujo"));
+    form.addView(text("Presets de dibujo"));
     String[] labels=new String[catalog.length+1];labels[0]="Personalizado";
     for(int i=0;i<catalog.length;i++)labels[i+1]=catalog[i].toString();
     ArrayAdapter<String> adapter=new ArrayAdapter<>(host,android.R.layout.simple_spinner_item,labels);
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);presets.setAdapter(adapter);
     form.addView(presets);
-    form.addView(host.text("Límite: 6000 px por lado y 36 millones de píxeles. Los formatos mayores requieren reducción proporcional."));
-    form.addView(host.text("Se creará una ilustración nueva. Guarda primero el dibujo actual."));
+    form.addView(text("Límite: 6000 px por lado y 36 millones de píxeles. Los formatos mayores requieren reducción proporcional."));
+    if(editor!=null)form.addView(text("Se creará una ilustración nueva. Guarda primero el dibujo actual."));
     width.addTextChangedListener(watch(0));height.addTextChangedListener(watch(1));
     linked.setOnCheckedChangeListener((button,checked)->{
       if(!checked)return;
@@ -87,18 +108,19 @@ final class DrawingProjectSetup {
           .setOnCancelListener(dialog->presets.setSelection(0)).show();
       }
     });
+    ScrollView scroll=new ScrollView(host);scroll.addView(form,new ScrollView.LayoutParams(-1,-2));
     AlertDialog dialog=new AlertDialog.Builder(host).setTitle("Crear ilustración")
-      .setView(host.scrollForm(form)).setNegativeButton("Cancelar",null)
+      .setView(scroll).setNegativeButton("Cancelar",null)
       .setPositiveButton("Crear ilustración",null).create();
     dialog.setOnShowListener(ignored->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view->{
-      if(host.readProjectProgress()!=null){host.message("Espera a que termine la operación actual");return;}
+      if(editor!=null&&editor.readProjectProgress()!=null){message("Espera a que termine la operación actual");return;}
       try{
         DocumentDimensions size=dimensions();
-        if(!host.readDrawing().newDocument(size.width,size.height)){host.message("No se pudo crear la ilustración con la memoria disponible");return;}
-        host.markDocumentClean("Sin título");dialog.dismiss();
+        if(!submit.create(size.width,size.height)){message("No se pudo crear la ilustración con la memoria disponible");return;}
+        dialog.dismiss();
       }catch(IllegalArgumentException error){
         String message=error instanceof NumberFormatException?"Introduce ancho y alto válidos en píxeles":error.getMessage();
-        (lastEdited==0?width:height).setError(message);host.message(message);
+        (lastEdited==0?width:height).setError(message);message(message);
       }
     }));
     dialog.show();return dialog;
