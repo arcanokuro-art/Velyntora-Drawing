@@ -17,7 +17,7 @@ public final class DrawingHero {
         }
         TextView title=text(c,phone?"Drawing · Versión piloto":"DIBUJO",phone?18:28,true);
         title.setGravity(Gravity.CENTER);controls.addView(title);
-        TextView description=text(c,"Crea ilustraciones, edita imágenes\ny da vida a tus ideas.",16,false);description.setGravity(Gravity.CENTER);controls.addView(description);
+        TextView description=text(c,"Empieza con un lienzo en blanco\no edita una imagen de tu dispositivo.",16,false);description.setGravity(Gravity.CENTER);controls.addView(description);
         LinearLayout.LayoutParams button=new LinearLayout.LayoutParams(-1,dp(c,52));button.topMargin=dp(c,18);controls.addView(button(c,"Crear ilustración",true,actions::createIllustration),button);
         LinearLayout.LayoutParams open=new LinearLayout.LayoutParams(-1,dp(c,52));open.topMargin=dp(c,12);controls.addView(button(c,"Abrir imagen",false,actions::openImage),open);
         FrameLayout.LayoutParams center=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);hero.addView(controls,center);

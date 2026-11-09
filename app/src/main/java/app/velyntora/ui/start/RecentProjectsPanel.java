@@ -1,14 +1,26 @@
 package app.velyntora.ui.start;
+
 import android.content.Context;
-import android.view.Gravity;
 import android.widget.*;
 import static app.velyntora.ui.common.Ui.*;
-public final class RecentProjectsPanel {
-    public static LinearLayout create(Context c,StartActions actions){
-        LinearLayout box=column(c);box.setPadding(dp(c,16),dp(c,12),dp(c,16),dp(c,12));box.setBackground(background(PANEL));
-        LinearLayout header=new LinearLayout(c);header.setGravity(Gravity.CENTER_VERTICAL);
-        header.addView(text(c,"Proyectos recientes",16,true),new LinearLayout.LayoutParams(0,-2,1));
-        header.addView(button(c,"Ver más »",false,actions::showRecentProjects),new LinearLayout.LayoutParams(dp(c,100),dp(c,48)));box.addView(header);
-        TextView empty=text(c,"Tus proyectos recientes aparecerán aquí.",14,false);empty.setTextColor(MUTED);empty.setGravity(Gravity.CENTER);box.addView(empty,new LinearLayout.LayoutParams(-1,dp(c,90)));return box;
+
+/** Paths for returning to saved work or learning the editor. */
+final class RecentProjectsPanel {
+    static LinearLayout create(Context context,StartActions actions){
+        LinearLayout panel=column(context);
+        panel.setPadding(dp(context,16),dp(context,12),dp(context,16),dp(context,12));
+        panel.setBackground(background(PANEL));
+        panel.addView(text(context,"Continuar un dibujo",16,true));
+        TextView detail=text(context,"Abre un proyecto .vlycore u .ora para seguir editando sus capas.",14,false);
+        detail.setTextColor(MUTED);
+        panel.addView(detail);
+        addAction(context,panel,"Abrir proyecto",actions::openProject);
+        addAction(context,panel,"Cómo empezar",actions::showHelp);
+        return panel;
+    }
+    private static void addAction(Context c,LinearLayout panel,String title,Runnable action){
+        LinearLayout.LayoutParams size=new LinearLayout.LayoutParams(-1,dp(c,48));
+        size.topMargin=dp(c,8);
+        panel.addView(button(c,title,false,action),size);
     }
 }

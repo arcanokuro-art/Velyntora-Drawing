@@ -41,13 +41,19 @@ public final class SaveMenuDeviceTest {
       assertTrue("The toolbar arrow must open saving destinations",opened);back();instrumentation.waitForIdleSync();
       instrumentation.runOnMainSync(()->{
         dialog[0]=editor.openSaveMenu();assertNotNull(dialog[0]);ListAdapter adapter=dialog[0].getListView().getAdapter();
-        String[] expected={"Guardar proyecto","Guardar OpenRaster","Guardar PNG","Guardar JPEG","Guardar WebP","Guardar BMP","Guardar TGA","Guardar TIFF","Guardar GIF (imagen fija)","Guardar ICO (hasta 256 px)","Guardar PPM","Guardar PDF","Imprimir…"};
+        String[] expected={"Guardar proyecto","Exportar PNG","Exportar PDF","Imprimir…","Más formatos"};
         assertEquals(expected.length,adapter.getCount());for(int i=0;i<expected.length;i++)assertEquals(expected[i],adapter.getItem(i));
-        dialog[0].getListView().performItemClick(null,11,11);
+        dialog[0].getListView().performItemClick(null,2,2);
       });
       instrumentation.waitForIdleSync();assertEquals("Guardar PDF must open the application/pdf file picker directly",1,picker.getHits());
       instrumentation.runOnMainSync(()->{
         assertNull("Cancelling the picker must not start an export",editor.readProjectProgress());
+        dialog[0]=new SaveMenu(editor).showOtherFormats();
+        ListAdapter exports=dialog[0].getListView().getAdapter();
+        String[] extra={"Guardar OpenRaster","Guardar JPEG","Guardar WebP","Guardar BMP","Guardar TGA","Guardar TIFF","Guardar GIF (imagen fija)","Guardar ICO (hasta 256 px)","Guardar PPM"};
+        assertEquals(extra.length,exports.getCount());
+        for(int i=0;i<extra.length;i++)assertEquals(extra[i],exports.getItem(i));
+        dialog[0].dismiss();
         String[] sections={"Archivo","Editar y selección","Lienzo e imagen","Color","Efectos","Ver","Ayuda"};
         android.widget.LinearLayout registry=editor.readMenuRegistry();
         assertEquals(sections.length,registry.getChildCount());

@@ -11,13 +11,7 @@ final class HelpMenu {
   void populate(LinearLayout menus) {
     host.button(menus, "Ayuda", () -> MenuChoices.show(host, "Ayuda",
       new String[]{"Guía rápida", "Atajos de teclado", "Acerca de Velyntora Drawing"},
-      () -> info("Guía rápida",
-        "Empieza con Nuevo o Abrir en la barra superior.\n\n"
-        + "Elige una herramienta en el panel lateral. Sus ajustes aparecen junto al lienzo, en la barra de opciones. "
-        + "Toca los colores de la paleta para cambiarlos y usa el icono de capas para organizarlas.\n\n"
-        + "Usa ≡ para editar selecciones, cambiar el tamaño del lienzo, ajustar colores o aplicar efectos.\n\n"
-        + "La flecha ↓ abre Guardar y exportar. Guarda un proyecto .vlycore para conservarlo editable; "
-        + "usa PNG, PDF u otro formato para compartirlo."),
+      () -> QuickStartGuide.show(host),
       () -> info("Atajos de teclado",
         "Ctrl+N — Nuevo\nCtrl+O — Abrir\nCtrl+S — Guardar proyecto\nCtrl+P — Imprimir\n\n"
         + "Ctrl+Z — Deshacer\nCtrl+Y / Ctrl+Mayús+Z — Rehacer\n\n"

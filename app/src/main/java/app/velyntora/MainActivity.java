@@ -12,18 +12,22 @@ public final class MainActivity extends Activity implements StartActions {
     private void info(String title,String message){new AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton("Aceptar",null).show();}
     public void createIllustration(){showCreateDialog();}
     AlertDialog showCreateDialog(){return app.velyntora.editor.EditorNavigator.create(this);}
-    private static final int OPEN_IMAGE=2001;
-    public void openImage(){
+    private static final int OPEN_IMAGE=2001, OPEN_PROJECT=2002;
+    public void openImage(){chooseFile(OPEN_IMAGE,"image/*","Abrir imagen");}
+    public void openProject(){chooseFile(OPEN_PROJECT,"*/*","Abrir proyecto");}
+    private void chooseFile(int request,String type,String title){
         Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
-                .setType("image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        try{startActivityForResult(intent,OPEN_IMAGE);}
+                .setType(type).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try{startActivityForResult(intent,request);}
         catch(ActivityNotFoundException unavailable){
-            try{startActivityForResult(intent.setAction(Intent.ACTION_GET_CONTENT),OPEN_IMAGE);}
-            catch(ActivityNotFoundException noPicker){info("Abrir imagen","No hay un selector de imágenes disponible en este dispositivo.");}
+            try{startActivityForResult(intent.setAction(Intent.ACTION_GET_CONTENT),request);}
+            catch(ActivityNotFoundException noPicker){info(title,"No hay un selector de archivos disponible en este dispositivo.");}
         }
     }
-    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==OPEN_IMAGE&&result==RESULT_OK&&data!=null&&data.getData()!=null)app.velyntora.editor.EditorNavigator.open(this,data.getData());}
-    public void showRecentProjects(){info("Proyectos recientes","Todavía no hay proyectos guardados en esta versión piloto.");}
-    public void showPreferences(){info("Preferencias","Las preferencias estarán disponibles en una próxima etapa del prototipo.");}
-    public void showHelp(){info("Velyntora Drawing · Versión piloto","Versión piloto con el motor de Velyntora Core integrado. Crea ilustraciones y edita imágenes.\n\nPowered By Zaskar Startup");}
+    @Override protected void onActivityResult(int request,int result,Intent data){
+        super.onActivityResult(request,result,data);
+        if((request==OPEN_IMAGE||request==OPEN_PROJECT)&&result==RESULT_OK&&data!=null&&data.getData()!=null)
+            app.velyntora.editor.EditorNavigator.open(this,data.getData());
+    }
+    public void showHelp(){art.velyntora.core.QuickStartGuide.show(this);}
 }

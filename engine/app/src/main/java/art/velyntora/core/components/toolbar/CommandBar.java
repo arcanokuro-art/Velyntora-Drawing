@@ -39,6 +39,13 @@ final class CommandBar {
     tools=host.iconButton(trailing,"Herramientas","tools",()->host.togglePanel(host.readToolScroll()));
     layers=host.iconButton(trailing,"Capas","layers",()->host.togglePanel(host.readLayerScroll()));
     phoneSave=host.iconButton(trailing,"Guardar en celular","save",host::openSaveMenu);
+    phoneSave.setText("Guardar");
+    phoneSave.setTextSize(9);
+    phoneSave.setPadding(0,0,0,0);
+    phoneSave.setGravity(Gravity.CENTER);
+    android.graphics.drawable.Drawable icon=new WorkspaceIconDrawable("save");
+    icon.setBounds(0,0,host.dp(20),host.dp(20));
+    phoneSave.setCompoundDrawables(null,icon,null,null);
     header.addView(trailing,new LinearLayout.LayoutParams(0,height,2));
     root.addView(header);
   }
@@ -57,7 +64,8 @@ final class CommandBar {
 
   private void openMenu() {
     if(shortcuts.getVisibility()==View.VISIBLE){host.openMainMenu();return;}
-    MenuChoices.show(host,"Velyntora Drawing",new String[]{"Nueva ilustración","Abrir imagen","Menú completo"},
-        ()->host.protectDocument(()->host.configureDimensions(0)),host::openImage,host::openMainMenu);
+    MenuChoices.show(host,"Velyntora Drawing",new String[]{"Nueva ilustración","Abrir imagen","Abrir proyecto","Cómo empezar","Todas las opciones"},
+        ()->host.protectDocument(()->host.configureDimensions(0)),host::openImage,
+        ()->host.protectDocument(()->host.projectPicker(false)),()->QuickStartGuide.show(host),host::openMainMenu);
   }
 }

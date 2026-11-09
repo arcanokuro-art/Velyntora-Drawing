@@ -22,9 +22,6 @@ public final class StartScreen {
         TextView pilot=text(c,"VERSIÓN PILOTO · Prototipo en desarrollo",13,false);pilot.setTextColor(MUTED);pilot.setGravity(Gravity.CENTER);pilot.setPadding(0,dp(c,10),0,dp(c,24));right.addView(pilot);
         }
         right.addView(RecentProjectsPanel.create(c,actions),new LinearLayout.LayoutParams(-1,-2));
-        LinearLayout footer=new LinearLayout(c);footer.setGravity(Gravity.END);footer.setPadding(0,dp(c,12),0,0);
-        footer.addView(button(c,"Preferencias de Velyntora",false,actions::showPreferences),new LinearLayout.LayoutParams(-2,dp(c,48)));
-        LinearLayout.LayoutParams help=new LinearLayout.LayoutParams(-2,dp(c,48));help.leftMargin=dp(c,8);footer.addView(button(c,"? Ayuda",false,actions::showHelp),help);right.addView(footer);
         if(wide){scroll.addView(right);root.addView(scroll,new LinearLayout.LayoutParams(0,-1,0.64f));return root;}
         root.addView(right,new LinearLayout.LayoutParams(-1,-2));
         ScrollView page=new ScrollView(c);page.addView(root);return page;
