@@ -8,7 +8,7 @@ final class WorkspaceRenderer {
 
     if (v.getWidth() <= 0 || v.getHeight() <= 0) return;
     float scale = (float) v.viewport.scale;
-    canvas.drawColor(0xFF2B2B2B);
+    if(v.getBackground()==null)canvas.drawColor(0xFF2B2B2B);
     canvas.save();
     canvas.translate((float) v.viewport.centerX, (float) v.viewport.centerY);
     canvas.rotate((float) v.viewport.angle);

@@ -9,15 +9,18 @@ import android.widget.LinearLayout;
 final class CommandBar {
   private final MainActivity host;
   private HorizontalScrollView shortcuts;
-  private Button save, tools, layers, phoneSave;
+  private Button save, tools, layers, phoneSave, menu;
+  private LinearLayout header;
+  private android.graphics.drawable.Drawable wideMenu;
   private LinearLayout leading, trailing;
   CommandBar(MainActivity host) {this.host=host;}
 
   void create(LinearLayout root) {
     int height=host.dp(48);
-    LinearLayout header=host.row();
+    header=host.row();
     leading=host.row();
-    host.iconButton(leading,"Menú principal","menu",this::openMenu);
+    menu=host.iconButton(leading,"Menú principal","menu",this::openMenu);
+    wideMenu=menu.getBackground();
     LinearLayout commands=host.row();
     host.iconButton(commands,"Nuevo","new",()->host.protectDocument(()->host.configureDimensions(0)));
     host.iconButton(commands,"Abrir","open",host::openImage);
@@ -40,7 +43,10 @@ final class CommandBar {
     layers=host.iconButton(trailing,"Capas","layers",()->host.togglePanel(host.readLayerScroll()));
     phoneSave=host.iconButton(trailing,"Guardar en celular","save",host::openSaveMenu);
     phoneSave.setText("Guardar");
-    phoneSave.setTextSize(9);
+    phoneSave.setTextSize(11);
+    phoneSave.setTextColor(PhoneAppearance.ACCENT);
+    phoneSave.setBackground(PhoneAppearance.action(host,true));
+    phoneSave.setLayoutParams(new LinearLayout.LayoutParams(host.dp(68),host.dp(48)));
     phoneSave.setPadding(0,0,0,0);
     phoneSave.setGravity(Gravity.CENTER);
     android.graphics.drawable.Drawable icon=new WorkspaceIconDrawable("save");
@@ -52,8 +58,12 @@ final class CommandBar {
 
   void update(boolean phone) {
     int height=host.dp(48);
+    header.setPadding(phone?host.dp(10):0,phone?host.dp(6):0,phone?host.dp(10):0,phone?host.dp(6):0);
+    menu.setBackground(phone?PhoneAppearance.action(host,false):wideMenu);
+    host.readDocumentTitle().setTextSize(phone?14:12);
+    host.readDocumentTitle().setTypeface(phone?android.graphics.Typeface.DEFAULT_BOLD:android.graphics.Typeface.DEFAULT);
     for(LinearLayout side:new LinearLayout[]{leading,trailing})
-      side.setLayoutParams(phone?new LinearLayout.LayoutParams(height,height):new LinearLayout.LayoutParams(0,height,2));
+      side.setLayoutParams(phone?new LinearLayout.LayoutParams(host.dp(68),height):new LinearLayout.LayoutParams(0,height,2));
     shortcuts.setVisibility(phone?View.GONE:View.VISIBLE);
     save.setContentDescription(phone?"Guardar (barra amplia)":"Guardar");
     phoneSave.setContentDescription(phone?"Guardar":"Guardar en celular");

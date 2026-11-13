@@ -12,6 +12,7 @@ final class WorkspaceComposition {
   private final MainActivity host;
   private CommandBar commandBar;
   private PhoneWorkspace phone;
+  private LinearLayout root;
   private LinearLayout topOptions, phoneOptions, desktopPalette;
   private boolean phoneLayout;
   boolean closePhonePanel(){return phone!=null&&phone.closePanel();}
@@ -37,7 +38,7 @@ final class WorkspaceComposition {
           host.readLayerRefreshHandler().removeCallbacks(host.readLayerRefreshTask());
           host.readLayerRefreshHandler().postDelayed(host.readLayerRefreshTask(), 120);
         });
-    LinearLayout root = new LinearLayout(host);
+    root = new LinearLayout(host);
     root.setOrientation(LinearLayout.VERTICAL);
     root.setBackgroundColor(0xFF2B2B2B);
     host.getWindow().setStatusBarColor(0xFF202020);
@@ -104,6 +105,10 @@ final class WorkspaceComposition {
             Math.max(1, config.screenHeightDp),
             config.fontScale);
     phoneLayout=layout.phone;
+    root.setBackgroundColor(phoneLayout?PhoneAppearance.BACKGROUND:0xff2b2b2b);
+    host.readDrawing().setBackgroundColor(phoneLayout?PhoneAppearance.BACKGROUND:0xff2b2b2b);
+    phoneOptions.setPadding(phoneLayout?host.dp(10):0,0,phoneLayout?host.dp(10):0,0);
+    phoneOptions.setBackground(phoneLayout?PhoneAppearance.surface(host,PhoneAppearance.SURFACE,16,true):null);
     phone.layout(phoneLayout,host.readWorkspaceFrame(),config.screenHeightDp);
     commandBar.update(phoneLayout);
     host.layoutToolOptions(layout,config.screenWidthDp);
