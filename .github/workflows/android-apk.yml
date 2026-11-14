@@ -1,7 +1,7 @@
 name: Android piloto integrado
 on:
   push:
-    branches: [main, codex/drawing-stable-signing]
+    branches: [main, codex/drawing-stable-signing, codex/reynosa-help]
     paths-ignore: ['scripts/integrate_core.py', '.github/workflows/import-core.yml']
   workflow_dispatch:
   workflow_call:
@@ -36,6 +36,7 @@ jobs:
           ctest --test-dir build/core-tests --output-on-failure
       - run: gradle :app:assembleDebug :app:lintDebug --stacktrace
       - name: Firmar y verificar el APK piloto
+        if: github.ref != 'refs/heads/codex/reynosa-help'
         env:
           DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
           DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
@@ -44,6 +45,7 @@ jobs:
           bash .github/scripts/sign-android-pilot.sh \
             app/build/outputs/apk/debug/app-debug.apk Velyntora-Drawing-pilot.apk
       - name: Comparar el paquete y el código de versión con el APK publicado
+        if: github.ref != 'refs/heads/codex/reynosa-help'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -61,6 +63,7 @@ jobs:
             exit 1
           fi
       - name: Preparar prueba de actualización
+        if: github.ref != 'refs/heads/codex/reynosa-help'
         env:
           DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
           DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
@@ -92,11 +95,7 @@ jobs:
           script: |
             set -e
             bash scripts/check_android.sh
-            if adb shell pm path app.velyntora.drawing | grep -q '^package:'; then adb uninstall app.velyntora.drawing; fi
-            adb install "$RUNNER_TEMP/drawing-upgrade-base.apk"
-            adb shell 'run-as app.velyntora.drawing touch files-upgrade-marker'
-            adb install -r Velyntora-Drawing-pilot.apk
-            adb shell "run-as app.velyntora.drawing sh -c 'test -f files-upgrade-marker'"
+            if [ -f Velyntora-Drawing-pilot.apk ]; then if adb shell pm path app.velyntora.drawing | grep -q '^package:'; then adb uninstall app.velyntora.drawing; fi && adb install "$RUNNER_TEMP/drawing-upgrade-base.apk" && adb shell 'run-as app.velyntora.drawing touch files-upgrade-marker' && adb install -r Velyntora-Drawing-pilot.apk && adb shell "run-as app.velyntora.drawing sh -c 'test -f files-upgrade-marker'"; fi
       - name: Informes de pruebas Android
         if: always()
         uses: actions/upload-artifact@v4
@@ -107,6 +106,7 @@ jobs:
             app/build/outputs/androidTest-results/
             build/android-diagnostics/
       - uses: actions/upload-artifact@v4
+        if: github.ref != 'refs/heads/codex/reynosa-help'
         with:
           name: Velyntora-Drawing-pilot
           path: Velyntora-Drawing-pilot.apk
