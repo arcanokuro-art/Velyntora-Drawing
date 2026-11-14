@@ -36,7 +36,6 @@ jobs:
           ctest --test-dir build/core-tests --output-on-failure
       - run: gradle :app:assembleDebug :app:lintDebug --stacktrace
       - name: Firmar y verificar el APK piloto
-        if: github.ref != 'refs/heads/codex/reynosa-help'
         env:
           DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
           DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
@@ -45,7 +44,6 @@ jobs:
           bash .github/scripts/sign-android-pilot.sh \
             app/build/outputs/apk/debug/app-debug.apk Velyntora-Drawing-pilot.apk
       - name: Comparar el paquete y el código de versión con el APK publicado
-        if: github.ref != 'refs/heads/codex/reynosa-help'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -63,7 +61,6 @@ jobs:
             exit 1
           fi
       - name: Preparar prueba de actualización
-        if: github.ref != 'refs/heads/codex/reynosa-help'
         env:
           DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
           DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
@@ -106,7 +103,6 @@ jobs:
             app/build/outputs/androidTest-results/
             build/android-diagnostics/
       - uses: actions/upload-artifact@v4
-        if: github.ref != 'refs/heads/codex/reynosa-help'
         with:
           name: Velyntora-Drawing-pilot
           path: Velyntora-Drawing-pilot.apk
@@ -118,3 +114,10 @@ jobs:
         run: |
           gh release view pilot-latest >/dev/null 2>&1 || gh release create pilot-latest --title "Velyntora Drawing · Piloto" --notes "Versión piloto de Velyntora Drawing." --prerelease
           gh release upload pilot-latest Velyntora-Drawing-pilot.apk --clobber
+      - name: Publicar APK de revisión de Ayuda
+        if: github.ref == 'refs/heads/codex/reynosa-help'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view help-preview >/dev/null 2>&1 || gh release create help-preview --target "$GITHUB_SHA" --title "Velyntora Drawing · Vista previa de Ayuda" --notes "APK piloto para revisar Ayuda dentro del editor." --prerelease
+          gh release upload help-preview Velyntora-Drawing-pilot.apk --clobber
