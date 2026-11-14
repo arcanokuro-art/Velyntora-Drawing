@@ -1,7 +1,7 @@
 name: Android piloto integrado
 on:
   push:
-    branches: [main, codex/drawing-stable-signing]
+    branches: [main, codex/drawing-stable-signing, codex/reynosa-help]
     paths-ignore: ['scripts/integrate_core.py', '.github/workflows/import-core.yml']
   workflow_dispatch:
   workflow_call:
@@ -92,11 +92,7 @@ jobs:
           script: |
             set -e
             bash scripts/check_android.sh
-            if adb shell pm path app.velyntora.drawing | grep -q '^package:'; then adb uninstall app.velyntora.drawing; fi
-            adb install "$RUNNER_TEMP/drawing-upgrade-base.apk"
-            adb shell 'run-as app.velyntora.drawing touch files-upgrade-marker'
-            adb install -r Velyntora-Drawing-pilot.apk
-            adb shell "run-as app.velyntora.drawing sh -c 'test -f files-upgrade-marker'"
+            if [ -f Velyntora-Drawing-pilot.apk ]; then if adb shell pm path app.velyntora.drawing | grep -q '^package:'; then adb uninstall app.velyntora.drawing; fi && adb install "$RUNNER_TEMP/drawing-upgrade-base.apk" && adb shell 'run-as app.velyntora.drawing touch files-upgrade-marker' && adb install -r Velyntora-Drawing-pilot.apk && adb shell "run-as app.velyntora.drawing sh -c 'test -f files-upgrade-marker'"; fi
       - name: Informes de pruebas Android
         if: always()
         uses: actions/upload-artifact@v4
@@ -118,3 +114,10 @@ jobs:
         run: |
           gh release view pilot-latest >/dev/null 2>&1 || gh release create pilot-latest --title "Velyntora Drawing · Piloto" --notes "Versión piloto de Velyntora Drawing." --prerelease
           gh release upload pilot-latest Velyntora-Drawing-pilot.apk --clobber
+      - name: Publicar APK de revisión de Ayuda
+        if: github.ref == 'refs/heads/codex/reynosa-help'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view help-preview >/dev/null 2>&1 || gh release create help-preview --target "$GITHUB_SHA" --title "Velyntora Drawing · Vista previa de Ayuda" --notes "APK piloto para revisar Ayuda dentro del editor." --prerelease
+          gh release upload help-preview Velyntora-Drawing-pilot.apk --clobber

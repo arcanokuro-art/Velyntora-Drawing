@@ -2,7 +2,7 @@
 
 Responsabilidad propia de components/menus/help.
 
-Fuentes: `HelpMenu.java`.
+Fuentes: `HelpMenu.java`, `QuickStartGuide.java` y `HelpContent.java`. Inicio y el editor comparten la guía de primeros pasos. El menú de ayuda agrupa artículos disponibles sin conexión y conserva los atajos del editor.
 
 Los paquetes Java existentes se conservan por compatibilidad con Android, JNI y las herramientas. La carpeta expresa la propiedad del componente. Los componentes de interfaz reciben la fachada de composición; consultan y actualizan su estado mediante métodos, sin acceso directo a campos. Los codecs y modelos puros no dependen de la Activity.
 
