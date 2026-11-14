@@ -16,6 +16,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   apk:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,7 +60,32 @@ jobs:
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
             build/android-diagnostics/
-      - run: cp app/build/outputs/apk/debug/app-debug.apk Velyntora-Drawing-pilot.apk
+      - name: Firmar y verificar el APK piloto
+        env:
+          DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
+          DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
+          DRAWING_ANDROID_CERT_SHA256: ${{ vars.DRAWING_ANDROID_CERT_SHA256 }}
+        run: |
+          bash .github/scripts/sign-android-pilot.sh \
+            app/build/outputs/apk/debug/app-debug.apk Velyntora-Drawing-pilot.apk
+      - name: Comparar el paquete y el código de versión con el APK publicado
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous=$(mktemp)
+          trap 'rm -f "$previous"' EXIT
+          gh release download pilot-latest --pattern Velyntora-Drawing-pilot.apk --output "$previous" --clobber
+          aapt=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          previous_package=$("$aapt" dump badging "$previous" | sed -n "s/^package: name='\([^']*\)' versionCode='\([0-9]*\)'.*/\1 \2/p")
+          next_package=$("$aapt" dump badging Velyntora-Drawing-pilot.apk | sed -n "s/^package: name='\([^']*\)' versionCode='\([0-9]*\)'.*/\1 \2/p")
+          read -r previous_id previous_code <<< "$previous_package"
+          read -r next_id next_code <<< "$next_package"
+          if [[ "$previous_id" != app.velyntora.drawing || "$next_id" != "$previous_id" ||
+                ! "$previous_code" =~ ^[0-9]+$ || ! "$next_code" =~ ^[0-9]+$ ]] ||
+                (( next_code <= previous_code )); then
+            echo 'Conserva el identificador de Drawing y aumenta versionCode respecto al APK publicado.' >&2
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: Velyntora-Drawing-pilot
