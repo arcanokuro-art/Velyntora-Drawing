@@ -91,11 +91,14 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 120
           script: |
-            bash scripts/check_android.sh &&
-            adb uninstall app.velyntora.drawing &&
-            adb install "$RUNNER_TEMP/drawing-upgrade-base.apk" &&
-            adb shell 'run-as app.velyntora.drawing touch files-upgrade-marker' &&
-            adb install -r Velyntora-Drawing-pilot.apk &&
+            set -e
+            bash scripts/check_android.sh
+            if adb shell pm path app.velyntora.drawing | grep -q '^package:'; then
+              adb uninstall app.velyntora.drawing
+            fi
+            adb install "$RUNNER_TEMP/drawing-upgrade-base.apk"
+            adb shell 'run-as app.velyntora.drawing touch files-upgrade-marker'
+            adb install -r Velyntora-Drawing-pilot.apk
             adb shell 'run-as app.velyntora.drawing test -f files-upgrade-marker'
       - name: Informes de pruebas Android
         if: always()
