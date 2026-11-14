@@ -23,7 +23,7 @@ jobs:
         run: python engine/scripts/check_modular_boundaries.py
       - name: Compilar Reynosa para Android 16
         run: |
-          sdkmanager 'platforms;android-36' 'ndk;28.2.13676358' 'build-tools;36.0.0'
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'ndk;28.2.13676358' 'build-tools;36.0.0'
           gradle :app:bundleRelease :app:assembleRelease :app:lintRelease --stacktrace
       - name: Verificar la alineación de 16 KB
         run: |
