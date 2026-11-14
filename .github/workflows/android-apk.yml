@@ -36,6 +36,46 @@ jobs:
           cmake --build build/core-tests --parallel 2
           ctest --test-dir build/core-tests --output-on-failure
       - run: gradle :app:assembleDebug :app:lintDebug --stacktrace
+      - name: Firmar y verificar el APK piloto
+        env:
+          DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
+          DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
+          DRAWING_ANDROID_CERT_SHA256: ${{ vars.DRAWING_ANDROID_CERT_SHA256 }}
+        run: |
+          bash .github/scripts/sign-android-pilot.sh \
+            app/build/outputs/apk/debug/app-debug.apk Velyntora-Drawing-pilot.apk
+      - name: Comparar el paquete y el código de versión con el APK publicado
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous="$RUNNER_TEMP/drawing-previous.apk"
+          gh release download pilot-latest --pattern Velyntora-Drawing-pilot.apk --output "$previous" --clobber
+          aapt=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          previous_package=$("$aapt" dump badging "$previous" | sed -n "s/^package: name='\([^']*\)' versionCode='\([0-9]*\)'.*/\1 \2/p")
+          next_package=$("$aapt" dump badging Velyntora-Drawing-pilot.apk | sed -n "s/^package: name='\([^']*\)' versionCode='\([0-9]*\)'.*/\1 \2/p")
+          read -r previous_id previous_code <<< "$previous_package"
+          read -r next_id next_code <<< "$next_package"
+          if [[ "$previous_id" != app.velyntora.drawing || "$next_id" != "$previous_id" ||
+                ! "$previous_code" =~ ^[0-9]+$ || ! "$next_code" =~ ^[0-9]+$ ]] ||
+                (( next_code <= previous_code )); then
+            echo 'Conserva el identificador de Drawing y aumenta versionCode respecto al APK publicado.' >&2
+            exit 1
+          fi
+      - name: Preparar prueba de actualización
+        env:
+          DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
+          DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
+          DRAWING_ANDROID_CERT_SHA256: ${{ vars.DRAWING_ANDROID_CERT_SHA256 }}
+        run: |
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          previous="$RUNNER_TEMP/drawing-previous.apk"
+          verification=$("$apksigner" verify --print-certs "$previous")
+          # Solo el último APK de depuración se vuelve a firmar para simular la transición en el emulador.
+          if grep -Fq '02f451399d7fda479b9db930ef00646ffd19c295295cce1b472b4195dce3a0ad' <<< "$verification"; then
+            bash .github/scripts/sign-android-pilot.sh "$previous" "$RUNNER_TEMP/drawing-upgrade-base.apk"
+          else
+            cp "$previous" "$RUNNER_TEMP/drawing-upgrade-base.apk"
+          fi
       - name: Habilitar KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -50,7 +90,13 @@ jobs:
           disk-size: 2048M
           disable-animations: true
           emulator-boot-timeout: 120
-          script: bash scripts/check_android.sh
+          script: |
+            bash scripts/check_android.sh &&
+            adb uninstall app.velyntora.drawing &&
+            adb install "$RUNNER_TEMP/drawing-upgrade-base.apk" &&
+            adb shell 'run-as app.velyntora.drawing touch files-upgrade-marker' &&
+            adb install -r Velyntora-Drawing-pilot.apk &&
+            adb shell 'run-as app.velyntora.drawing test -f files-upgrade-marker'
       - name: Informes de pruebas Android
         if: always()
         uses: actions/upload-artifact@v4
@@ -60,32 +106,6 @@ jobs:
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
             build/android-diagnostics/
-      - name: Firmar y verificar el APK piloto
-        env:
-          DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
-          DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
-          DRAWING_ANDROID_CERT_SHA256: ${{ vars.DRAWING_ANDROID_CERT_SHA256 }}
-        run: |
-          bash .github/scripts/sign-android-pilot.sh \
-            app/build/outputs/apk/debug/app-debug.apk Velyntora-Drawing-pilot.apk
-      - name: Comparar el paquete y el código de versión con el APK publicado
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          previous=$(mktemp)
-          trap 'rm -f "$previous"' EXIT
-          gh release download pilot-latest --pattern Velyntora-Drawing-pilot.apk --output "$previous" --clobber
-          aapt=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
-          previous_package=$("$aapt" dump badging "$previous" | sed -n "s/^package: name='\([^']*\)' versionCode='\([0-9]*\)'.*/\1 \2/p")
-          next_package=$("$aapt" dump badging Velyntora-Drawing-pilot.apk | sed -n "s/^package: name='\([^']*\)' versionCode='\([0-9]*\)'.*/\1 \2/p")
-          read -r previous_id previous_code <<< "$previous_package"
-          read -r next_id next_code <<< "$next_package"
-          if [[ "$previous_id" != app.velyntora.drawing || "$next_id" != "$previous_id" ||
-                ! "$previous_code" =~ ^[0-9]+$ || ! "$next_code" =~ ^[0-9]+$ ]] ||
-                (( next_code <= previous_code )); then
-            echo 'Conserva el identificador de Drawing y aumenta versionCode respecto al APK publicado.' >&2
-            exit 1
-          fi
       - uses: actions/upload-artifact@v4
         with:
           name: Velyntora-Drawing-pilot
