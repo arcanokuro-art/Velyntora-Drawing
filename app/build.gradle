@@ -2,15 +2,15 @@ plugins { id 'com.android.application' }
 
 android {
     namespace 'app.velyntora'
-    compileSdk 35
+    compileSdk 36
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     defaultConfig {
         applicationId 'app.velyntora.drawing'
         minSdk 26
-        targetSdk 35
-        versionCode 17
+        targetSdk 36
+        versionCode 18
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        versionName '0.2.15-help-preview'
+        versionName '1.0.0'
     }
 }
 
