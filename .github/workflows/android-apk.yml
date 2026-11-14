@@ -1,7 +1,7 @@
 name: Android piloto integrado
 on:
   push:
-    branches: [main]
+    branches: [main, codex/drawing-stable-signing]
     paths-ignore: ['scripts/integrate_core.py', '.github/workflows/import-core.yml']
   workflow_dispatch:
   workflow_call:
@@ -12,11 +12,10 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: drawing-pilot-build
+  group: drawing-pilot-build-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   apk:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,6 +114,7 @@ jobs:
           path: Velyntora-Drawing-pilot.apk
           if-no-files-found: error
       - name: Publicar APK piloto
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
