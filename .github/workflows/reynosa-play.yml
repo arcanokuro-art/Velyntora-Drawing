@@ -3,6 +3,9 @@ on:
   push:
     branches: [codex/reynosa-play]
   workflow_dispatch:
+concurrency:
+  group: reynosa-release
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -68,19 +71,28 @@ jobs:
           DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
           DRAWING_ANDROID_CERT_SHA256: ${{ vars.DRAWING_ANDROID_CERT_SHA256 }}
         run: |
-          bash .github/scripts/sign-android-pilot.sh app/build/outputs/apk/release/app-release-unsigned.apk Velyntora-Drawing-1.0.0-Reynosa.apk
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose Velyntora-Drawing-1.0.0-Reynosa.apk
+          bash .github/scripts/sign-android-pilot.sh app/build/outputs/apk/release/app-release-unsigned.apk Velyntora-Drawing-1.0.0-Reynosa-build20.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose Velyntora-Drawing-1.0.0-Reynosa-build20.apk
+      - name: Verificar los textos del APK publicado
+        run: |
+          python - <<'PY'
+          from zipfile import ZipFile
+          with ZipFile('Velyntora-Drawing-1.0.0-Reynosa-build20.apk') as apk:
+              dex = b''.join(apk.read(n) for n in apk.namelist() if n.endswith('.dex'))
+              assert '1.0.0 · Reynosa · Powered by Zaskar Startup'.encode() in dex
+              assert 'Versión piloto · Powered by Zaskar Startup'.encode() not in dex
+          PY
       - name: Publicar descarga instalable
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view v1.0.0-reynosa >/dev/null 2>&1 || gh release create v1.0.0-reynosa --target "$GITHUB_SHA" --title "Velyntora Drawing 1.0.0 · Reynosa" --notes "Versión 1.0.0 Reynosa para revisión en Android. Incluye APK instalable y AAB para Play Console."
-          gh release upload v1.0.0-reynosa Velyntora-Drawing-1.0.0-Reynosa.apk Velyntora-Drawing-1.0.0-Reynosa.aab --clobber
+          gh release upload v1.0.0-reynosa Velyntora-Drawing-1.0.0-Reynosa-build20.apk Velyntora-Drawing-1.0.0-Reynosa.aab --clobber
       - uses: actions/upload-artifact@v4
         with:
           name: Velyntora-Drawing-1.0.0-Reynosa
           path: |
             Velyntora-Drawing-1.0.0-Reynosa.aab
-            Velyntora-Drawing-1.0.0-Reynosa.apk
+            Velyntora-Drawing-1.0.0-Reynosa-build20.apk
             app/src/main/res/drawable-nodpi/ic_velyntora_drawing.png
           if-no-files-found: error
