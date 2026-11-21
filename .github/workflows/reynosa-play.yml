@@ -4,7 +4,7 @@ on:
     branches: [codex/reynosa-play]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   bundle:
     runs-on: ubuntu-latest
@@ -62,10 +62,25 @@ jobs:
           jarsigner -keystore "$keystore" -storetype PKCS12 -storepass:env DRAWING_ANDROID_KEYSTORE_PASSWORD \
             -signedjar Velyntora-Drawing-1.0.0-Reynosa.aab app/build/outputs/bundle/release/app-release.aab drawing
           jarsigner -verify Velyntora-Drawing-1.0.0-Reynosa.aab
+      - name: Firmar y verificar el APK instalable de Reynosa
+        env:
+          DRAWING_ANDROID_KEYSTORE_BASE64: ${{ secrets.DRAWING_ANDROID_KEYSTORE_BASE64 }}
+          DRAWING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DRAWING_ANDROID_KEYSTORE_PASSWORD }}
+          DRAWING_ANDROID_CERT_SHA256: ${{ vars.DRAWING_ANDROID_CERT_SHA256 }}
+        run: |
+          bash .github/scripts/sign-android-pilot.sh app/build/outputs/apk/release/app-release-unsigned.apk Velyntora-Drawing-1.0.0-Reynosa.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose Velyntora-Drawing-1.0.0-Reynosa.apk
+      - name: Publicar descarga instalable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.0.0-reynosa >/dev/null 2>&1 || gh release create v1.0.0-reynosa --target "$GITHUB_SHA" --title "Velyntora Drawing 1.0.0 · Reynosa" --notes "Versión 1.0.0 Reynosa para revisión en Android. Incluye APK instalable y AAB para Play Console."
+          gh release upload v1.0.0-reynosa Velyntora-Drawing-1.0.0-Reynosa.apk Velyntora-Drawing-1.0.0-Reynosa.aab --clobber
       - uses: actions/upload-artifact@v4
         with:
           name: Velyntora-Drawing-1.0.0-Reynosa
           path: |
             Velyntora-Drawing-1.0.0-Reynosa.aab
+            Velyntora-Drawing-1.0.0-Reynosa.apk
             app/src/main/res/drawable-nodpi/ic_velyntora_drawing.png
           if-no-files-found: error
