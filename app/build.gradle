@@ -8,7 +8,7 @@ android {
         applicationId 'app.velyntora.drawing'
         minSdk 26
         targetSdk 36
-        versionCode 19
+        versionCode 20
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         versionName '1.0.0'
     }
