@@ -43,7 +43,7 @@ final class PhoneStartScreen {
         art.setBackground(shape(c,CARD));art.setClipToOutline(true);
         LinearLayout.LayoutParams cover=new LinearLayout.LayoutParams(-1,dp(c,126));
         cover.topMargin=dp(c,16);page.addView(art,cover);
-        TextView credit=text(c,"Versión piloto · Powered by Zaskar Startup",12,false);
+        TextView credit=text(c,"1.0.0 · Reynosa · Powered by Zaskar Startup",12,false);
         credit.setGravity(Gravity.CENTER);credit.setTextColor(MUTED);
         credit.setPadding(0,dp(c,14),0,0);page.addView(credit);
         return scroll;

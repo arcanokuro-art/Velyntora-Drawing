@@ -15,7 +15,7 @@ public final class DrawingHero {
             logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
             controls.addView(logo,new LinearLayout.LayoutParams(-1,dp(c,38)));
         }
-        TextView title=text(c,phone?"Drawing · Versión piloto":"DIBUJO",phone?18:28,true);
+        TextView title=text(c,phone?"Drawing · 1.0.0 Reynosa":"DIBUJO",phone?18:28,true);
         title.setGravity(Gravity.CENTER);controls.addView(title);
         TextView description=text(c,"Empieza con un lienzo en blanco\no edita una imagen de tu dispositivo.",16,false);description.setGravity(Gravity.CENTER);controls.addView(description);
         LinearLayout.LayoutParams button=new LinearLayout.LayoutParams(-1,dp(c,52));button.topMargin=dp(c,18);controls.addView(button(c,"Crear ilustración",true,actions::createIllustration),button);
